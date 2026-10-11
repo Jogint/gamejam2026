@@ -4,7 +4,7 @@ switch (tipo) { // variável de objeto
     break;
 
     case TIPOS_BOTOES.PLAY:
-        room_goto(rm_main);
+        room_goto(rm_set_status);
     break;
 
     case TIPOS_BOTOES.CONFIGS:

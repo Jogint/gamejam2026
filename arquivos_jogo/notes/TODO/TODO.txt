@@ -14,8 +14,7 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
 
 ## A fazer
 
-- [ ] FEAT: Sorteador de qual equipe você fará parte nessa run
-  - Aleatório na primeira, pondeirado nas seguintes
+- [ ] FEAT: Criar variáveis de instância nos obj_set_status para salvar seus dados em uma struct global.status_player
 
 - [ ] FEAT: Criar lista de ações que afetam positivamente ou negativamente um grupo
 
