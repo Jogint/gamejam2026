@@ -1,0 +1,63 @@
+exige habil# Tarefas pendentes
+
+Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @seunome ao lado da tarefa para determinar como sua responsabilidade.  
+
+[Modelo do TODO](https://github.com/todomd/todo.md)
+
+## Guia de tags
+
+- **feat:** Adiciona, ajusta ou remove alguma nova feature  
+- **fix:** Corrige um bug no sistema  
+- **refactor:** Reestrutura o código para ficar mais limpo ou otimizado
+- **docs:** Mudanças apenas na documentação do projeto
+- **chore:** Mudanças não específicadas anteriormente
+
+## A fazer
+
+- [ ] FEAT: Sorteador de qual equipe você fará parte nessa run
+  - Aleatório na primeira, pondeirado nas seguintes
+
+- [ ] FEAT: Criar lista de ações que afetam positivamente ou negativamente um grupo
+
+- [ ] FEAT: Definir os status iniciais do player
+
+- [ ] FEAT: Escolha de skills iniciais
+  - Dispor 3 cartas ao jogador e permitir a escolha de 1 para aprimorar um status
+  - Escolha de classe com base no cenário atual da equipe (?)
+
+- [ ] FEAT: Criar o inventário do jogador, onde ele guarda recursos, equipamentos e afins
+
+- [ ] FEAT: Sistema de apresentação de cartas de ação
+  - Coleta de recursos na sua área (reduz os recursos da próxima geração)
+  - Invasão de área de outra equipe para coletar seus recursos (exige habilidade de ataque)
+  - Estudo de produção de armas (custa recurso)
+  - Plantio (custa recurso, mas ganha recurso a longo prazo)
+  - Pensar em mais ações
+
+- [ ] FEAT: Sistema de eventos
+  - As ações do player podem levar a efeitos futuros, que acontecem TEMPO após a escolha. Mais de um evento pode acontecer no mesmo período, contanto que não sejam opostos
+  - Briga contra outra facção
+  - Encontro amigável com NPC
+  - Resultado das pesquisas
+  - Eventos ambientais aleatórios
+
+- [ ] FEAT: Tela de morte após fim do TEMPO e atribuição de uma nova equipe na reencarnação
+  - Exibir uma mensagem do que mudou no ambiente enquanto vc estava em outro plano
+  - Exemplo: "o grupo COR se inspirou em sua história para criar novas armas, criando um forte exército, mas não há mais minério disponível."
+
+- [ ] FEAT: Sistema de finais
+  - Após o usuário fazer X pontos em alguma categoria, mostra uma tela com sua categoria ao longo das vidas
+  - Pesquisador
+  - Aventureiro
+  - Guerreiro
+  - pensar em mais categorias
+
+### Arte necessária (até o momento)
+
+- [ ] Logo do jogo
+- [ ] Background do menu
+- [ ] Estilo de botões do menu
+
+## Em produção
+
+> não há nada em produção

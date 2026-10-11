@@ -11,10 +11,11 @@
   "defaultScriptType":1,
   "Folders":[
     {"$GMFolder":"","%Name":"Fontes","folderPath":"folders/Fontes.yy","name":"Fontes","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"Scripts","folderPath":"folders/Scripts.yy","name":"Scripts","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Notas","folderPath":"folders/Notas.yy","name":"Notas","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Objetos","folderPath":"folders/Objetos.yy","name":"Objetos","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Botoes","folderPath":"folders/Objetos/Botoes.yy","name":"Botoes","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Rooms","folderPath":"folders/Rooms.yy","name":"Rooms","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Scripts","folderPath":"folders/Scripts.yy","name":"Scripts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Sprites","folderPath":"folders/Sprites.yy","name":"Sprites","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Backgrounds","folderPath":"folders/Sprites/Backgrounds.yy","name":"Backgrounds","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Botoes","folderPath":"folders/Sprites/Botoes.yy","name":"Botoes","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -30,6 +31,7 @@
   "resources":[
     {"id":{"name":"fnt_parag","path":"fonts/fnt_parag/fnt_parag.yy",},},
     {"id":{"name":"fnt_titulo","path":"fonts/fnt_titulo/fnt_titulo.yy",},},
+    {"id":{"name":"TODO","path":"notes/TODO/TODO.yy",},},
     {"id":{"name":"obj_botao_pai","path":"objects/obj_botao_pai/obj_botao_pai.yy",},},
     {"id":{"name":"obj_configs","path":"objects/obj_configs/obj_configs.yy",},},
     {"id":{"name":"obj_controle_jogo","path":"objects/obj_controle_jogo/obj_controle_jogo.yy",},},
