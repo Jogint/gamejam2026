@@ -1,4 +1,4 @@
-exige habil# Tarefas pendentes
+# Tarefas pendentes
 
 Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @seunome ao lado da tarefa para determinar como sua responsabilidade.  
 
