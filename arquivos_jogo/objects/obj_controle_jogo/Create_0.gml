@@ -3,3 +3,5 @@ enum TIPOS_BOTOES {
     PLAY,
     CONFIGS,
 }
+
+scr_reset_draw();

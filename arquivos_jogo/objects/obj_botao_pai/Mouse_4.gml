@@ -4,7 +4,7 @@ switch (tipo) { // variável de objeto
     break;
 
     case TIPOS_BOTOES.PLAY:
-        show_message("obj_botao_pai: Configurar o  room_go_to para a room principal no botao filho.");
+        room_goto(rm_main);
     break;
 
     case TIPOS_BOTOES.CONFIGS:

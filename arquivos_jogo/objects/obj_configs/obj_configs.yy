@@ -1,11 +1,12 @@
 {
   "$GMObject":"",
-  "%Name":"obj_opcoes",
+  "%Name":"obj_configs",
   "eventList":[],
   "managed":true,
-  "name":"obj_opcoes",
+  "name":"obj_configs",
   "overriddenProperties":[
     {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"obj_botao_pai","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"propertyId":{"name":"tipo","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"TIPOS_BOTOES.CONFIGS",},
+    {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"obj_botao_pai","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"propertyId":{"name":"nome","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"Configurações",},
   ],
   "parent":{
     "name":"Botoes",

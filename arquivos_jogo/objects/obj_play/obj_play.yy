@@ -6,6 +6,7 @@
   "name":"obj_play",
   "overriddenProperties":[
     {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"obj_botao_pai","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"propertyId":{"name":"tipo","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"TIPOS_BOTOES.PLAY",},
+    {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"obj_botao_pai","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"propertyId":{"name":"nome","path":"objects/obj_botao_pai/obj_botao_pai.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"Jogar",},
   ],
   "parent":{
     "name":"Botoes",
