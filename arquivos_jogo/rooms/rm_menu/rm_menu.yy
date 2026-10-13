@@ -8,6 +8,7 @@
   "instanceCreationOrder":[
     {"name":"inst_47F28AD","path":"rooms/rm_menu/rm_menu.yy",},
     {"name":"inst_7420D395","path":"rooms/rm_menu/rm_menu.yy",},
+    {"name":"inst_6F7CE5C8","path":"rooms/rm_menu/rm_menu.yy",},
   ],
   "isDnd":false,
   "layers":[

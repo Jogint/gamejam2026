@@ -1,6 +1,6 @@
 # Tarefas pendentes
 
-Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @seunome ao lado da tarefa para determinar como sua responsabilidade.
+Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @seunome ao lado da tarefa para determinar como sua responsabilidade.  
 
 [Modelo do TODO](https://github.com/todomd/todo.md)
 

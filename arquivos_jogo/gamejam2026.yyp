@@ -27,6 +27,8 @@
     {"$GMFolder":"","%Name":"CORPOS","folderPath":"folders/Sprites/GAMECHAR/inimigos/CORPOS.yy","name":"CORPOS","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"main character","folderPath":"folders/Sprites/GAMECHAR/main character.yy","name":"main character","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"misc","folderPath":"folders/Sprites/GAMECHAR/misc.yy","name":"misc","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Backgrounds","folderPath":"folders/Sprites/Backgrounds.yy","name":"Backgrounds","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Botoes","folderPath":"folders/Sprites/Botoes.yy","name":"Botoes","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[],
