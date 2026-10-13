@@ -24,7 +24,6 @@ function p_curar_total(_p) {
 // ================= HITBOXES (clique e desenho usam as mesmas) =================
 function box_avancar() { return [450, 240, 830, 310]; }
 function box_retorno() { return [450, 330, 830, 400]; }
-function box_iniciar() { return [450, 600, 830, 670]; }
 
 function box_card() {
     var off = (1 - card_anim) * 320;
@@ -37,9 +36,27 @@ function box_opcao(_i) {
 }
 
 function box_skill(_k) { return [550 + _k * 120, 595, 660 + _k * 120, 670]; }
-function box_slot_party(_i) { return [40, 25 + _i * 215, 320, 225 + _i * 215]; }
-function box_slot_inimigo(_i) { return [960, 25 + _i * 215, 1240, 225 + _i * 215]; }
+
+// ALTERADO: fila horizontal estilo Darkest Dungeon. O índice 0 fica mais perto do centro.
+function box_slot_party(_i) {
+    var x2 = 580 - _i * 140;
+    return [x2 - 135, 62, x2, 252];
+}
+function box_slot_inimigo(_i) {
+    var x1 = 700 + _i * 140;
+    return [x1, 62, x1 + 135, 252];
+}
+
 function box_upg(_i) { return [200, 110 + _i * 52, 1080, 156 + _i * 52]; }
+
+// NOVO: hub da preparação
+function box_hub(_k) { return [330, 150 + _k * 90, 760, 220 + _k * 90]; }
+function box_voltar() { return [40, 640, 240, 690]; }
+function box_missao(_c, _r) {
+    var x1 = 30 + _c * 310;
+    var y1 = 110 + _r * 85;
+    return [x1, y1, x1 + 300, y1 + 78];
+}
 
 // ================= DADOS =================
 function skill_nova(_id) {
@@ -57,17 +74,16 @@ function skill_nova(_id) {
     return new Skill("???", 1, 1, STAT.forca, SKILL_TIPO.dano);
 }
 
-// ALTERADO: recebe a origem (facção) e define a classe de cada inimigo
 function inimigo_novo(_id, _origem) {
     var e = new Personagem("Inimigo");
-    var cl = CLASSE.soldado;   // NOVO
+    var cl = CLASSE.soldado;
     switch (_id) {
         case ENEMY_ID.besta:
             e.nome = "Besta das Ruínas";
             e.stats[STAT.vitalidade] = 2;
             e.stats[STAT.forca] = 2;
             e.skills = [skill_nova(SKILL_ID.mordida), skill_nova(SKILL_ID.investida)];
-            cl = CLASSE.mutante;   // NOVO
+            cl = CLASSE.mutante;
             break;
         case ENEMY_ID.saqueador:
             e.nome = "Saqueador";
@@ -75,48 +91,60 @@ function inimigo_novo(_id, _origem) {
             e.stats[STAT.forca] = 2;
             e.stats[STAT.tecnica] = 2;
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
-            cl = CLASSE.soldado;   // NOVO
+            cl = CLASSE.soldado;
             break;
         case ENEMY_ID.sentinela:
             e.nome = "Sentinela";
             e.stats[STAT.vitalidade] = 2;
             e.skills = [skill_nova(SKILL_ID.disparo), skill_nova(SKILL_ID.sobrecarga)];
-            cl = CLASSE.maquina;   // NOVO
+            cl = CLASSE.maquina;
             break;
         case ENEMY_ID.rato:
             e.nome = "Rato Mutante";
             e.stats[STAT.vitalidade] = 0;
             e.stats[STAT.forca] = 1;
             e.skills = [skill_nova(SKILL_ID.mordida)];
-            cl = CLASSE.mutante;   // NOVO
+            cl = CLASSE.mutante;
             break;
         case ENEMY_ID.guarda:
             e.nome = "Guarda do Posto";
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.rajada)];
-            cl = CLASSE.soldado;   // NOVO
+            cl = CLASSE.soldado;
+            break;
+        case ENEMY_ID.colosso:   // NOVO: boss
+            e.nome = "Colosso das Ruínas";
+            e.stats[STAT.vitalidade] = 8;
+            e.stats[STAT.forca] = 5;
+            e.stats[STAT.tecnica] = 4;
+            e.skills = [skill_nova(SKILL_ID.investida), skill_nova(SKILL_ID.sobrecarga)];
+            cl = CLASSE.mutante;
             break;
     }
-    visual_aleatorio(e, cl, _origem);   // NOVO
+    visual_aleatorio(e, cl, _origem);
     p_curar_total(e);
     return e;
 }
 
-// NOVO: monta os inimigos da carta (chamada quando a carta hostil aparece)
+// ALTERADO: até MAX_INIMIGOS; nomes repetidos viram "B", "C", "D"
 function montar_inimigos(_c) {
     inimigos = [];
-    for (var i = 0; i < array_length(_c.inimigos); i++) {
+    var n_total = min(array_length(_c.inimigos), MAX_INIMIGOS);
+    for (var i = 0; i < n_total; i++) {
         var e = inimigo_novo(_c.inimigos[i], _c.origin);
-        if (i > 0 && inimigos[i - 1].nome == e.nome) e.nome += " B";
+        var n = 0;
+        for (var j = 0; j < i; j++) {
+            if (string_pos(e.nome, inimigos[j].nome) == 1) n++;
+        }
+        if (n > 0) e.nome += " " + chr(65 + n);
         array_push(inimigos, e);
     }
 }
 
-// ALTERADO: recebe a origem para pintar o aliado
 function aliado_novo(_nome, _origem) {
     var a = new Personagem(_nome);
     a.stats[STAT.vitalidade] = 2;
     a.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.remendo)];
-    visual_aleatorio(a, CLASSE.civil, _origem);   // NOVO (se for NPC importante, use visual_fixo)
+    visual_aleatorio(a, CLASSE.civil, _origem);   // se for NPC importante, use visual_fixo
     p_curar_total(a);
     return a;
 }
@@ -167,6 +195,16 @@ function criar_deck_jogo() {
     c.recompensa_valor = 4;
     array_push(deck, c);
 
+    // NOVO: teste de 4 inimigos
+    c = new Card();
+    c.name = "Emboscada Saqueadora";
+    c.description = "Um bando inteiro estava esperando você sair do corredor.";
+    c.origin = CARD_ORIGIN.faction_3;
+    c.tipo = CARD_TIPO.hostil;
+    c.inimigos = [ENEMY_ID.saqueador, ENEMY_ID.saqueador, ENEMY_ID.rato, ENEMY_ID.rato];
+    c.recompensa_valor = 7;
+    array_push(deck, c);
+
     c = new Card();
     c.name = "Comerciante Errante";
     c.description = "Um sobrevivente oferece dicas sobre a região em troca de uma boa conversa.";
@@ -180,7 +218,7 @@ function criar_deck_jogo() {
     c.name = "Terminal Antigo";
     c.description = "Um painel elétrico selado bloqueia o acesso ao depósito principal.";
     c.origin = CARD_ORIGIN.faction_2;
-    c.sprite_interacao = spr_cenario_base;   // NOVO
+    c.sprite_interacao = spr_cenario_base;
     carta_opcoes(c, STAT.tecnica, 5, STAT.imaginacao, 4, STAT.forca, 6);
     c.fail_tempo = 3;
     c.recompensa_valor = 4;
@@ -189,7 +227,7 @@ function criar_deck_jogo() {
     c = new Card();
     c.name = "Reservatório Intacto";
     c.description = "Uma cisterna lacrada guarda água limpa e suprimentos médicos.";
-    c.sprite_interacao = spr_cenario_base;   // NOVO
+    c.sprite_interacao = spr_cenario_base;
     carta_opcoes(c, STAT.tecnica, 4, STAT.imaginacao, 3, STAT.sorte, 4);
     c.recompensa = RECOMPENSA.cura;
     c.recompensa_valor = 8;
@@ -199,7 +237,7 @@ function criar_deck_jogo() {
     c = new Card();
     c.name = "Treino Improvisado";
     c.description = "Restos de uma arena de treino. Dá para aprender algo antes de seguir.";
-    c.sprite_interacao = spr_cenario_base;   // NOVO
+    c.sprite_interacao = spr_cenario_base;
     carta_opcoes(c, STAT.vitalidade, 4, STAT.forca, 3, STAT.carisma, 3);
     c.recompensa = RECOMPENSA.stat;
     c.recompensa_stat = STAT.forca;
@@ -222,7 +260,7 @@ function criar_deck_jogo() {
 }
 
 function criar_upgrades() {
-    return [
+    var lista = [
         new Upgrade("Reservas de Água", "+6 de tempo inicial", 4, UPG_EFEITO.tempo, 0, 6),
         new Upgrade("Rota Segura", "Retorno custa 2 a menos", 4, UPG_EFEITO.retorno, 0, 2),
         new Upgrade("Atalho", "Contornar custa 1 a menos", 3, UPG_EFEITO.contornar, 0, 1),
@@ -232,6 +270,13 @@ function criar_upgrades() {
         new Upgrade("Kit de Remendo", "Começa com a skill Remendo", 5, UPG_EFEITO.skill, SKILL_ID.remendo, 0),
         new Upgrade("Treino de Improviso", "Começa com a skill Improviso", 5, UPG_EFEITO.skill, SKILL_ID.improviso, 0)
     ];
+
+    // NOVO: upgrade final único da Facção 1 (conclui a missão única dela)
+    var u = new Upgrade("Ascensão Final", "Alternativa ao recurso (efeito a definir)", 12, UPG_EFEITO.unico, 0, 0);
+    u.faccao = FACTION.faction_1;
+    array_push(lista, u);
+
+    return lista;
 }
 
 // ================= HERANÇA: PONTO FIXO =================
@@ -254,7 +299,7 @@ function criar_carta_fixa() {
     if (d == -1) {
         c.name = "Ruínas Vazias";
         c.description = "Ninguém reivindicou este ponto da trilha. Ainda.";
-        c.sprite_interacao = spr_cenario_base;   // NOVO
+        c.sprite_interacao = spr_cenario_base;
         carta_opcoes(c, STAT.tecnica, 3, STAT.sorte, 3, STAT.imaginacao, 3);
         c.recompensa_valor = 3;
         c.fail_tempo = 2;
@@ -263,7 +308,7 @@ function criar_carta_fixa() {
         c.description = "O trabalho das gerações anteriores ergueu este abrigo. Há água, comida e um lugar para descansar.";
         c.origin = d + 1;
         c.tipo = CARD_TIPO.posto;
-        c.sprite_interacao = spr_cenario_base;   // NOVO
+        c.sprite_interacao = spr_cenario_base;
     } else {
         c.name = "Posto da Facção " + string(d + 1);
         c.description = "Outra facção fincou bandeira aqui, graças aos recursos que ela entregou. Eles não deixam estranhos passarem.";
@@ -271,6 +316,7 @@ function criar_carta_fixa() {
         c.tipo = CARD_TIPO.hostil;
         c.inimigos = [ENEMY_ID.guarda];
         c.recompensa_valor = 6;
+        c.ponto_fixo = true;   // NOVO: conta para a dominação
     }
     return c;
 }
@@ -287,12 +333,14 @@ function acao_iniciar_run(_fac) {
     custo_contornar = 3;
 
     player = new Personagem("Sobrevivente F" + string(_fac + 1));
-    visual_fixo(player, CLASSE.sobrevivente, origem_da_faccao(_fac), lib_player[_fac], noone);   // NOVO
+    visual_fixo(player, CLASSE.sobrevivente, origem_da_faccao(_fac), lib_player[_fac], noone);
     player.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
-    party_membro = noone;
+    aliados = [];   // ALTERADO
 
+    // ALTERADO: upgrades da facção atual
+    var comprados = upgrades_comprados[_fac];
     for (var i = 0; i < array_length(upgrades); i++) {
-        if (!upgrades_comprados[i]) continue;
+        if (!comprados[i]) continue;
         var u = upgrades[i];
         switch (u.efeito) {
             case UPG_EFEITO.tempo:     tempo_run_max += u.valor; break;
@@ -300,6 +348,22 @@ function acao_iniciar_run(_fac) {
             case UPG_EFEITO.contornar: custo_contornar -= u.valor; break;
             case UPG_EFEITO.stat:      player.stat_mods[u.alvo] += u.valor; break;
             case UPG_EFEITO.skill:     acao_dar_skill(player, u.alvo); break;
+        }
+    }
+
+    // NOVO: missão selecionada vale só para esta run
+    run_missao = missao_sel;
+    missao_sel = undefined;
+    escoltado = undefined;
+    carga_ativa = false;
+    skill_deslocada = undefined;
+    if (run_missao != undefined) {
+        var m = missoes[run_missao.d][run_missao.i];
+        if (m.tipo == MISSAO_TIPO.escolta) {
+            escoltado = aliado_novo(m.npc_nome, origem_da_faccao(run_missao.d));
+            array_push(aliados, escoltado);
+        } else if (m.tipo == MISSAO_TIPO.entrega) {
+            acao_dar_carga(m);
         }
     }
 
@@ -311,7 +375,7 @@ function acao_iniciar_run(_fac) {
     inimigos = [];
     popups = [];
     carta_atual = undefined;
-    figura_evento = undefined;   // NOVO
+    figura_evento = undefined;
     ultima_carta = undefined;
     carta_resolvida = false;
     card_msg = "";
@@ -341,6 +405,7 @@ function pode_retornar() {
     return (nivel_expedicao > 0 && tempo >= calcular_custo_retorno());
 }
 
+// ALTERADO: missões têm prioridade sobre o ponto fixo de herança
 function acao_avancar_expedicao() {
     nivel_expedicao++;
 
@@ -349,14 +414,20 @@ function acao_avancar_expedicao() {
         return;
     }
 
-    if (nivel_expedicao == nivel_fixo) {
+    var mi = missao_no_nivel(nivel_expedicao);
+    if (mi != undefined) {
+        acao_mostrar_card(criar_carta_missao(mi.d, mi.i));
+    } else if (nivel_expedicao == nivel_fixo) {
         acao_mostrar_card(criar_carta_fixa());
     } else {
         acao_mostrar_card(sortear_do_deck());
     }
 }
 
+// ALTERADO: 20% de chance de um emissário de outra facção
 function sortear_do_deck() {
+    if (random(1) < 0.2) return criar_carta_emissario();
+
     var c = deck_global[irandom(array_length(deck_global) - 1)];
     var tentativas = 0;
     while (c == ultima_carta && tentativas < 10) {
@@ -375,7 +446,7 @@ function acao_mostrar_card(_c) {
     card_anim = 0;
     estado = GAME_STATE.card;
 
-    // NOVO: define a figura do painel de evento
+    // figura mostrada no painel da direita
     figura_evento = undefined;
     if (_c.tipo == CARD_TIPO.hostil) {
         montar_inimigos(_c);
@@ -395,9 +466,13 @@ function acao_mostrar_card(_c) {
             carta_resolvida = true;
             ganho = min(12, tempo_run_max - tempo);
             if (ganho > 0) mudar_tempo(ganho);
-            p_curar_total(player);
-            if (party_membro != noone) p_curar_total(party_membro);
+            var g = get_grupo();   // ALTERADO: cura o grupo todo
+            for (var i = 0; i < array_length(g); i++) p_curar_total(g[i]);
             card_msg = "Você descansa no posto: tempo e HP recuperados.";
+            break;
+        case CARD_TIPO.missao:   // NOVO
+            carta_resolvida = true;
+            card_msg = missao_chegada(_c);
             break;
     }
 }
@@ -409,7 +484,9 @@ function acao_resolver_escolha(_idx) {
     } else {
         var opt = carta_atual.options[_idx];
         var total = stat_total(player, opt.stat);
-        if (party_membro != noone) total += floor(stat_total(party_membro, opt.stat) / 2);
+        for (var a = 0; a < array_length(aliados); a++) {   // ALTERADO
+            total += floor(stat_total(aliados[a], opt.stat) / 2);
+        }
 
         var sucesso = (total >= opt.required);
         if (!sucesso) {
@@ -428,6 +505,7 @@ function acao_resolver_escolha(_idx) {
 }
 
 function acao_aplicar_recompensa(_c) {
+    var novo;
     switch (_c.recompensa) {
         case RECOMPENSA.recurso:
             recurso += _c.recompensa_valor;
@@ -441,14 +519,17 @@ function acao_aplicar_recompensa(_c) {
             if (_c.recompensa_stat == STAT.vitalidade) player.hp += _c.recompensa_valor * 3;
             return "+" + string(_c.recompensa_valor) + " " + stat_nomes[_c.recompensa_stat] + " até o fim da expedição.";
         case RECOMPENSA.aliado:
-            if (party_membro == noone) {
-                // ALTERADO: reaproveita o aliado que apareceu na carta (mesmo visual)
-                if (_c.tipo == CARD_TIPO.amigavel) party_membro = figura_evento;
-                else party_membro = aliado_novo(_c.aliado_nome, _c.origin);
+            if (array_length(aliados) < MAX_GRUPO - 1) {
+                // reaproveita o aliado que apareceu na carta (mesmo visual)
+                novo = (_c.tipo == CARD_TIPO.amigavel) ? figura_evento : aliado_novo(_c.aliado_nome, _c.origin);
+                array_push(aliados, novo);
                 return _c.aliado_nome + " se juntou ao seu grupo!";
             }
             recurso += 3;
-            return "Você já tem um aliado, então ela deixa 3 recursos de suprimento.";
+            return "Seu grupo já está cheio, então ela deixa 3 recursos de suprimento.";
+        case RECOMPENSA.relacao:   // NOVO
+            relacao_mudar(_c.origin, 1);
+            return "Acordo firmado! Relação com a Facção " + string(_c.origin) + ": " + string(relacao[faccao_atual][_c.origin]) + " / " + string(RELACAO_MAX) + ".";
     }
     return "";
 }
@@ -457,6 +538,12 @@ function curar_grupo(_v) {
     var g = get_grupo();
     for (var i = 0; i < array_length(g); i++) {
         g[i].hp = min(p_hp_max(g[i]), g[i].hp + _v);
+    }
+}
+
+function remover_aliados_mortos() {
+    for (var i = array_length(aliados) - 1; i >= 0; i--) {
+        if (aliados[i].hp <= 0) array_delete(aliados, i, 1);
     }
 }
 
@@ -474,36 +561,55 @@ function acao_finalizar_run(_fim) {
     }
 
     estoque_faccoes[faccao_atual] += rec_salvo;
-    reserva += rec_salvo;
+    reserva[faccao_atual] += rec_salvo;   // ALTERADO: reserva por facção
     estado = GAME_STATE.run_end;
 }
 
 function acao_reencarnar() {
     faccao_atual = (faccao_atual + 1) % FACTION.count;
+    missao_sel = undefined;               // NOVO: seleção não atravessa facções
+    prep_tela = PREP_TELA.menu;           // NOVO
     estado = GAME_STATE.preparacao;
 }
 
 // ================= UPGRADES =================
+// NOVO: índices dos upgrades que a facção atual enxerga
+function upgrades_visiveis() {
+    var v = [];
+    for (var i = 0; i < array_length(upgrades); i++) {
+        var u = upgrades[i];
+        if (u.faccao == -1 || u.faccao == faccao_atual) array_push(v, i);
+    }
+    return v;
+}
+
 function contar_upgrades_skill() {
     var n = 0;
+    var comprados = upgrades_comprados[faccao_atual];
     for (var i = 0; i < array_length(upgrades); i++) {
-        if (upgrades_comprados[i] && upgrades[i].efeito == UPG_EFEITO.skill) n++;
+        if (comprados[i] && upgrades[i].efeito == UPG_EFEITO.skill) n++;
     }
     return n;
 }
 
 function upgrade_pode_comprar(_i) {
     var u = upgrades[_i];
-    if (upgrades_comprados[_i]) return false;
-    if (reserva < u.custo) return false;
+    if (upgrades_comprados[faccao_atual][_i]) return false;
+    if (reserva[faccao_atual] < u.custo) return false;
     if (u.efeito == UPG_EFEITO.skill && contar_upgrades_skill() >= slots_upg) return false;
+    if (u.efeito == UPG_EFEITO.unico && missao_bloqueada(FACTION.faction_1, 4)) return false;
     return true;
 }
 
 function acao_comprar_upgrade(_i) {
     if (!upgrade_pode_comprar(_i)) return;
-    reserva -= upgrades[_i].custo;
-    upgrades_comprados[_i] = true;
+    reserva[faccao_atual] -= upgrades[_i].custo;
+    upgrades_comprados[faccao_atual][_i] = true;
+
+    if (upgrades[_i].efeito == UPG_EFEITO.unico) {
+        alt_recurso = true;                              // efeito ainda a definir
+        missao_concluir(FACTION.faction_1, 4, false);    // conclui a missão única da F1
+    }
 }
 
 // ================= STEP: CLIQUES POR ESTADO =================
@@ -537,14 +643,54 @@ function step_card() {
     }
 }
 
+// ALTERADO: hub com sub-telas
 function step_preparacao() {
-    for (var i = 0; i < array_length(upgrades); i++) {
-        if (util_in(box_upg(i))) {
-            acao_comprar_upgrade(i);
-            return;
-        }
+    var vis = [];
+    var c = 0;
+    var r = 0;
+
+    switch (prep_tela) {
+        case PREP_TELA.menu:
+            if (util_in(box_hub(0))) prep_tela = PREP_TELA.upgrades;
+            else if (util_in(box_hub(1))) prep_tela = PREP_TELA.dialogo;
+            else if (util_in(box_hub(2))) prep_tela = PREP_TELA.missoes;
+            else if (util_in(box_hub(3))) acao_iniciar_run(faccao_atual);
+            break;
+
+        case PREP_TELA.upgrades:
+            if (util_in(box_voltar())) {
+                prep_tela = PREP_TELA.menu;
+                return;
+            }
+            vis = upgrades_visiveis();
+            for (var i = 0; i < array_length(vis); i++) {
+                if (util_in(box_upg(i))) {
+                    acao_comprar_upgrade(vis[i]);
+                    return;
+                }
+            }
+            break;
+
+        case PREP_TELA.dialogo:
+            prep_tela = PREP_TELA.menu;   // qualquer clique fecha
+            break;
+
+        case PREP_TELA.missoes:
+            if (util_in(box_voltar())) {
+                prep_tela = PREP_TELA.menu;
+                return;
+            }
+            for (c = 0; c < TOTAL_FACCOES; c++) {
+                for (r = 0; r < 5; r++) {
+                    if (util_in(box_missao(c, r)) && missao_pode_selecionar(c, r)) {
+                        if (missao_selecionada(c, r)) missao_sel = undefined;
+                        else missao_sel = { d: c, i: r };
+                        return;
+                    }
+                }
+            }
+            break;
     }
-    if (util_in(box_iniciar())) acao_iniciar_run(faccao_atual);
 }
 
 // ================= ANIMAÇÃO E HOVER =================
@@ -568,13 +714,43 @@ function atualizar_animacoes() {
     }
 
     tick_personagem(player);
-    if (party_membro != noone) tick_personagem(party_membro);
+    for (var a = 0; a < array_length(aliados); a++) tick_personagem(aliados[a]);   // ALTERADO
     for (var e = 0; e < array_length(inimigos); e++) tick_personagem(inimigos[e]);
 
     for (var p = array_length(popups) - 1; p >= 0; p--) {
         popups[p].y -= 0.6;
         popups[p].vida -= 1;
         if (popups[p].vida <= 0) array_delete(popups, p, 1);
+    }
+}
+
+// NOVO
+function hover_preparacao() {
+    var vis = [];
+    switch (prep_tela) {
+        case PREP_TELA.menu:
+            if (util_in(box_hub(0))) hover = HV.hub;
+            else if (util_in(box_hub(1))) hover = HV.hub + 1;
+            else if (util_in(box_hub(2))) hover = HV.hub + 2;
+            else if (util_in(box_hub(3))) hover = HV.iniciar;
+            break;
+
+        case PREP_TELA.upgrades:
+            vis = upgrades_visiveis();
+            for (var i = 0; i < array_length(vis); i++) {
+                if (util_in(box_upg(i)) && upgrade_pode_comprar(vis[i])) hover = HV.upg + i;
+            }
+            if (util_in(box_voltar())) hover = HV.voltar;
+            break;
+
+        case PREP_TELA.missoes:
+            for (var c = 0; c < TOTAL_FACCOES; c++) {
+                for (var r = 0; r < 5; r++) {
+                    if (util_in(box_missao(c, r))) hover = HV.missao + c * 5 + r;
+                }
+            }
+            if (util_in(box_voltar())) hover = HV.voltar;
+            break;
     }
 }
 
@@ -600,10 +776,7 @@ function calcular_hover() {
             break;
 
         case GAME_STATE.preparacao:
-            for (var j = 0; j < array_length(upgrades); j++) {
-                if (util_in(box_upg(j)) && upgrade_pode_comprar(j)) hover = HV.upg + j;
-            }
-            if (util_in(box_iniciar())) hover = HV.iniciar;
+            hover_preparacao();
             break;
     }
 

@@ -1,6 +1,7 @@
-function get_grupo() {
+
+function get_grupo() {   // ALTERADO
     var g = [player];
-    if (party_membro != noone) array_push(g, party_membro);
+    for (var i = 0; i < array_length(aliados); i++) array_push(g, aliados[i]);
     return g;
 }
 
@@ -41,22 +42,20 @@ function calcular_tempo_rodada() {
     return t;
 }
 
-function centro_slot(_p) {
+function centro_slot(_p) {   // ALTERADO
     var b = box_slot_party(0);
-    if (_p == player) {
-        b = box_slot_party(0);
-    } else if (_p == party_membro) {
-        b = box_slot_party(1);
-    } else {
-        for (var i = 0; i < array_length(inimigos); i++) {
-            if (inimigos[i] == _p) b = box_slot_inimigo(i);
-        }
+    var g = get_grupo();
+    for (var j = 0; j < array_length(g); j++) {
+        if (g[j] == _p) b = box_slot_party(j);
+    }
+    for (var i = 0; i < array_length(inimigos); i++) {
+        if (inimigos[i] == _p) b = box_slot_inimigo(i);
     }
     return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 }
 
 // ================= INÍCIO / RODADAS =================
-// ALTERADO: os inimigos já foram montados em montar_inimigos (chamada em acao_mostrar_card)
+// os inimigos já foram montados em montar_inimigos (chamada em acao_mostrar_card)
 function acao_iniciar_combate(_c) {
     c_recompensa = _c.recompensa_valor;
     c_rodada = 1;
@@ -196,6 +195,7 @@ function combate_step_skill(_clicou) {
     var sk = g[c_ator].skills;
     for (var k = 0; k < array_length(sk); k++) {
         if (util_in(box_skill(k))) {
+            if (sk[k].tipo == SKILL_TIPO.carga) return;   // NOVO: carga não é usável em combate
             c_skill = k;
             c_fase = COMBAT_FASE.alvo;
             return;
@@ -217,7 +217,7 @@ function combate_step_alvo(_clicou, _clicou_dir) {
     // clicar em outra skill troca a seleção
     for (var k = 0; k < array_length(ator.skills); k++) {
         if (util_in(box_skill(k))) {
-            c_skill = k;
+            if (ator.skills[k].tipo != SKILL_TIPO.carga) c_skill = k;   // ALTERADO
             return;
         }
     }
@@ -254,7 +254,8 @@ function combate_step_resolver(_clicou) {
 function combate_step_fim() {
     switch (c_resultado) {
         case COMBAT_RES.vitoria:
-            if (party_membro != noone && party_membro.hp <= 0) party_membro = noone;
+            remover_aliados_mortos();   // ALTERADO
+            pos_vitoria_carta();        // NOVO: missões, dominação e relação
             if (tempo <= 0) acao_finalizar_run(FIM_RUN.tempo);
             else estado = GAME_STATE.expedition;
             break;
@@ -285,7 +286,7 @@ function combate_hover() {
             }
         } else {
             for (var j = 0; j < array_length(g); j++) {
-                if (g[j].hp > 0 && util_in(box_slot_party(j))) hover = HV.alvo + 2 + j;
+                if (g[j].hp > 0 && util_in(box_slot_party(j))) hover = HV.alvo + 4 + j;   // ALTERADO
             }
         }
     }

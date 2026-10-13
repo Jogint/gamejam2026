@@ -13,6 +13,9 @@ function criar_biblioteca_sprites() {
 
     // player: um sprite fixo por facção jogável
     lib_player = array_create(FACTION.count, spr_corpo_base);
+
+    // NOVO: líderes (sprite overworld) por facção jogável
+    lib_lideres = array_create(FACTION.count, spr_lider_base);
 }
 
 // FACTION (0..2) -> CARD_ORIGIN (1..3)
@@ -98,4 +101,20 @@ function figurante_novo(_origem) {
     var f = new Personagem("Figurante");
     visual_aleatorio(f, CLASSE.civil, _origem);
     return f;
+}
+
+// NOVO: líder de uma facção jogável (importante, com sprite overworld)
+function lider_novo(_f) {
+    var l = new Personagem("Líder da Facção " + string(_f + 1));
+    visual_fixo(l, CLASSE.soldado, origem_da_faccao(_f), lib_corpos[CLASSE.soldado], noone);
+    l.spr_overworld = lib_lideres[_f];
+    return l;
+}
+
+function criar_lideres() {
+    var l = [];
+    for (var f = 0; f < FACTION.count; f++) {
+        array_push(l, lider_novo(f));
+    }
+    return l;
 }

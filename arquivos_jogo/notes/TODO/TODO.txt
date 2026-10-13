@@ -16,10 +16,10 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
 
 ### Essencial para a entrega (sex 16/10, 13h)
 
-- [ ] FEAT: Fazer upgrades, e inventário de recurso ser único por facção
+- [X] FEAT: Fazer upgrades, e inventário de recurso ser único por facção
   - No momento, está tudo sendo salvo numa única pool genérica, pegar um upgrade em uma facção libera ele em todas as outras
 
-- [ ] FIX: Testar o protótipo de ponta a ponta e corrigir o que quebrar
+- [X] FIX: Testar o protótipo de ponta a ponta e corrigir o que quebrar
   - Ordem: expedição → evento → combate → NPC/aliado → fim de run → preparação → posto do nível 5
 
 - [ ] FEAT: Balancear tempo, HP e dano
@@ -72,7 +72,7 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
 - [ ] FEAT: Mais inimigos, skills, cards e upgrades
   - Guia de como adicionar está na conversa (enums em `scr_game_defs`, dados em `scr_game_logic`)
 
-- [ ] FEAT: Sistema de finais
+- [X] FEAT: Sistema de finais
   - Contar pontos por tipo de ação ao longo das vidas
   - Ao atingir X pontos numa categoria, mostrar a tela do final
   - Categorias: Pesquisador, Aventureiro, Guerreiro (pensar em mais)
