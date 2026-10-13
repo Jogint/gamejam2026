@@ -215,8 +215,8 @@
   "maintainGms1Font":false,
   "name":"fnt_main",
   "parent":{
-    "name":"Fontes",
-    "path":"folders/Fontes.yy",
+    "name":"arquivos_jogo-rebuilt",
+    "path":"arquivos_jogo-rebuilt.yyp",
   },
   "pointRounding":0,
   "ranges":[

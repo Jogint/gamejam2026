@@ -11,8 +11,8 @@
   "name":"obj_set_status",
   "overriddenProperties":[],
   "parent":{
-    "name":"Botoes",
-    "path":"folders/Objetos/Botoes.yy",
+    "name":"Objetos",
+    "path":"folders/Objetos.yy",
   },
   "parentObjectId":null,
   "persistent":false,

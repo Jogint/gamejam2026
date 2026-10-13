@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_combate",
   "parent":{
-    "name":"RUN",
-    "path":"folders/Scripts/RUN.yy",
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
