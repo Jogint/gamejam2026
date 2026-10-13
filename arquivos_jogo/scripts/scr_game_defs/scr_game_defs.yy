@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"scr_cards",
+  "%Name":"scr_game_defs",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scr_cards",
+  "name":"scr_game_defs",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scripts.yy",
