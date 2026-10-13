@@ -1,12 +1,13 @@
 enum GAME_STATE { expedition, card, combat, run_end, preparacao }
 enum FACTION { faction_1, faction_2, faction_3, count }
-enum CARD_ORIGIN { neutral, faction_1, faction_2, faction_3, faction_4 }
+enum CARD_ORIGIN { neutral, faction_1, faction_2, faction_3, faction_4, count }   // ALTERADO: count
 enum CARD_TIPO { evento, hostil, amigavel, posto }
 enum RECOMPENSA { recurso, cura, stat, aliado }
 enum STAT { vitalidade, forca, imaginacao, tecnica, sorte, carisma, count }
 enum SKILL_TIPO { dano, cura }
 enum SKILL_ID { golpe, tiro, improviso, remendo, mordida, investida, disparo, sobrecarga, rajada }
 enum ENEMY_ID { besta, saqueador, sentinela, rato, guarda }
+enum CLASSE { sobrevivente, soldado, mutante, maquina, civil, count }   // NOVO
 enum COMBAT_FASE { skill, alvo, resolver, fim }
 enum COMBAT_RES { nenhum, vitoria, derrota, tempo }
 enum FIM_RUN { retorno, trilha, tempo, derrota }
@@ -32,6 +33,16 @@ function Personagem(_nome) constructor {
     hp = 1;
     hp_vis = 1;
     flash = 0;
+
+    // visual                                 // NOVO
+    classe = CLASSE.civil;
+    faccao = CARD_ORIGIN.neutral;
+    importante = false;
+    spr_head = noone;
+    spr_body = noone;
+    spr_overworld = noone;
+    pose = 0;
+    cor = c_white;
 }
 
 function Card() constructor {
@@ -39,7 +50,7 @@ function Card() constructor {
     description = "Sem Descrição";
     origin = CARD_ORIGIN.neutral;
     tipo = CARD_TIPO.evento;
-    sprite_interacao = noone;
+    sprite_interacao = noone;   // sprite de cenário (se noone, o evento usa um personagem aleatório)
 
     options = [];
     recompensa = RECOMPENSA.recurso;

@@ -56,14 +56,8 @@ function centro_slot(_p) {
 }
 
 // ================= INÍCIO / RODADAS =================
+// ALTERADO: os inimigos já foram montados em montar_inimigos (chamada em acao_mostrar_card)
 function acao_iniciar_combate(_c) {
-    inimigos = [];
-    for (var i = 0; i < array_length(_c.inimigos); i++) {
-        var e = inimigo_novo(_c.inimigos[i]);
-        if (i > 0 && inimigos[i - 1].nome == e.nome) e.nome += " B";
-        array_push(inimigos, e);
-    }
-
     c_recompensa = _c.recompensa_valor;
     c_rodada = 1;
     c_resultado = COMBAT_RES.nenhum;

@@ -39,10 +39,6 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
 
 - [ ] FEAT: Tutorial (telas simples de texto)
 
-- [ ] FEAT: Sitema de áudio
-  - Função para chamar arquivo de música, e parar a anterior
-  - Função para tocar sound effect
-
 - [ ] DOCS: Mostrar onde aparece cada parte do tema (pessoas, comunidades, natureza e tecnologia)
   - Tecnologia ainda não tem lugar definido no jogo
 
@@ -81,7 +77,9 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
   - Ao atingir X pontos numa categoria, mostrar a tela do final
   - Categorias: Pesquisador, Aventureiro, Guerreiro (pensar em mais)
 
-- [ ] FEAT: Sons e música
+- [ ] FEAT: Sitema de áudio (pra não ter que usar só o nativo do gamemaker)
+  - Função para chamar arquivo de música, e parar a anterior
+  - Função para tocar sound effect
 
 ### Arte necessária (até o momento)
 

@@ -1,3 +1,4 @@
+
 // botão genérico: a barra clara "desliza" da esquerda no hover
 function draw_botao(_b, _txt, _cor, _cor_txt, _hv_id, _ativo) {
     var h = (_hv_id >= 0) ? hover_anim[_hv_id] : 0;
@@ -19,6 +20,33 @@ function draw_botao(_b, _txt, _cor, _cor_txt, _hv_id, _ativo) {
     draw_text((_b[0] + _b[2]) / 2, (_b[1] + _b[3]) / 2, _txt);
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
+}
+
+// NOVO: desenha o personagem com os pés em (_x, _y). Origem dos sprites: embaixo no centro.
+function draw_personagem(_p, _x, _y, _esc, _overworld) {
+    var vivo = (_p.hp > 0);
+    var cor = _p.importante ? c_white : _p.cor;   // importante já vem colorido: não pinta
+    var alfa = 1;
+
+    if (!vivo) {
+        cor = merge_color(cor, c_black, 0.6);
+        alfa = 0.6;
+    }
+
+    // sprite de overworld, se existir e se for pedido
+    if (_overworld && _p.spr_overworld != noone) {
+        draw_sprite_ext(_p.spr_overworld, 0, _x, _y, _esc, _esc, 0, cor, alfa);
+        return;
+    }
+
+    // senão: corpo + cabeça (mesma pose nos dois)
+    if (_p.spr_body != noone) {
+        draw_sprite_ext(_p.spr_body, _p.pose, _x, _y, _esc, _esc, 0, cor, alfa);
+    }
+    if (_p.spr_head != noone) {
+        var sub = _p.pose mod sprite_get_number(_p.spr_head);
+        draw_sprite_ext(_p.spr_head, sub, _x, _y, _esc, _esc, 0, cor, alfa);
+    }
 }
 
 function draw_hp_barra(_x1, _y1, _x2, _y2, _p) {
@@ -68,7 +96,8 @@ function draw_slot_personagem(_b, _p, _hv_id, _valido) {
     draw_set_halign(fa_center);
     draw_set_color(vivo ? c_white : c_gray);
     draw_text((x1 + x2) / 2, y1 + 10, _p.nome);
-    draw_text((x1 + x2) / 2, y1 + 80, vivo ? "[ Sprite ]" : "[ Derrotado ]");
+    draw_personagem(_p, (x1 + x2) / 2, y2 - 50, 1, false);                // ALTERADO
+    if (!vivo) draw_text((x1 + x2) / 2, y1 + 80, "[ Derrotado ]");        // ALTERADO
     draw_set_halign(fa_left);
 
     draw_hp_barra(x1 + 20, y2 - 42, x2 - 20, y2 - 24, _p);
@@ -86,12 +115,18 @@ function draw_paineis() {
 
     draw_set_halign(fa_center);
     draw_text(180, 40, player.nome);
-    draw_text(180, 260, "[ Sprite do Player ]");
-    if (party_membro != noone) draw_text(180, 420, "[ Sprite " + party_membro.nome + " ]");
+    draw_personagem(player, 180, 300, 2, false);                           // ALTERADO
+    if (party_membro != noone) {
+        draw_text(180, 330, party_membro.nome);                            // ALTERADO
+        draw_personagem(party_membro, 180, 500, 1, false);                 // ALTERADO
+    }
 
     draw_text(1100, 40, "Ameaça / Interação");
+    // ALTERADO: cenário (sprite do evento) OU personagem gerado
     if (estado == GAME_STATE.card && carta_atual != undefined && carta_atual.sprite_interacao != noone) {
         draw_sprite(carta_atual.sprite_interacao, 0, 1100, 260);
+    } else if (estado == GAME_STATE.card && figura_evento != undefined) {
+        draw_personagem(figura_evento, 1100, 300, 2, false);
     } else {
         draw_text(1100, 260, "[ Sprite Evento ]");
     }

@@ -1,3 +1,4 @@
+
 // ================= UTILIDADES =================
 function util_box(_mx, _my, _x1, _y1, _x2, _y2) {
     return (_mx >= _x1 && _mx <= _x2 && _my >= _y1 && _my <= _y2);
@@ -56,14 +57,17 @@ function skill_nova(_id) {
     return new Skill("???", 1, 1, STAT.forca, SKILL_TIPO.dano);
 }
 
-function inimigo_novo(_id) {
+// ALTERADO: recebe a origem (facção) e define a classe de cada inimigo
+function inimigo_novo(_id, _origem) {
     var e = new Personagem("Inimigo");
+    var cl = CLASSE.soldado;   // NOVO
     switch (_id) {
         case ENEMY_ID.besta:
             e.nome = "Besta das Ruínas";
             e.stats[STAT.vitalidade] = 2;
             e.stats[STAT.forca] = 2;
             e.skills = [skill_nova(SKILL_ID.mordida), skill_nova(SKILL_ID.investida)];
+            cl = CLASSE.mutante;   // NOVO
             break;
         case ENEMY_ID.saqueador:
             e.nome = "Saqueador";
@@ -71,31 +75,48 @@ function inimigo_novo(_id) {
             e.stats[STAT.forca] = 2;
             e.stats[STAT.tecnica] = 2;
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
+            cl = CLASSE.soldado;   // NOVO
             break;
         case ENEMY_ID.sentinela:
             e.nome = "Sentinela";
             e.stats[STAT.vitalidade] = 2;
             e.skills = [skill_nova(SKILL_ID.disparo), skill_nova(SKILL_ID.sobrecarga)];
+            cl = CLASSE.maquina;   // NOVO
             break;
         case ENEMY_ID.rato:
             e.nome = "Rato Mutante";
             e.stats[STAT.vitalidade] = 0;
             e.stats[STAT.forca] = 1;
             e.skills = [skill_nova(SKILL_ID.mordida)];
+            cl = CLASSE.mutante;   // NOVO
             break;
         case ENEMY_ID.guarda:
             e.nome = "Guarda do Posto";
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.rajada)];
+            cl = CLASSE.soldado;   // NOVO
             break;
     }
+    visual_aleatorio(e, cl, _origem);   // NOVO
     p_curar_total(e);
     return e;
 }
 
-function aliado_novo(_nome) {
+// NOVO: monta os inimigos da carta (chamada quando a carta hostil aparece)
+function montar_inimigos(_c) {
+    inimigos = [];
+    for (var i = 0; i < array_length(_c.inimigos); i++) {
+        var e = inimigo_novo(_c.inimigos[i], _c.origin);
+        if (i > 0 && inimigos[i - 1].nome == e.nome) e.nome += " B";
+        array_push(inimigos, e);
+    }
+}
+
+// ALTERADO: recebe a origem para pintar o aliado
+function aliado_novo(_nome, _origem) {
     var a = new Personagem(_nome);
     a.stats[STAT.vitalidade] = 2;
     a.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.remendo)];
+    visual_aleatorio(a, CLASSE.civil, _origem);   // NOVO (se for NPC importante, use visual_fixo)
     p_curar_total(a);
     return a;
 }
@@ -159,6 +180,7 @@ function criar_deck_jogo() {
     c.name = "Terminal Antigo";
     c.description = "Um painel elétrico selado bloqueia o acesso ao depósito principal.";
     c.origin = CARD_ORIGIN.faction_2;
+    c.sprite_interacao = spr_cenario_base;   // NOVO
     carta_opcoes(c, STAT.tecnica, 5, STAT.imaginacao, 4, STAT.forca, 6);
     c.fail_tempo = 3;
     c.recompensa_valor = 4;
@@ -167,6 +189,7 @@ function criar_deck_jogo() {
     c = new Card();
     c.name = "Reservatório Intacto";
     c.description = "Uma cisterna lacrada guarda água limpa e suprimentos médicos.";
+    c.sprite_interacao = spr_cenario_base;   // NOVO
     carta_opcoes(c, STAT.tecnica, 4, STAT.imaginacao, 3, STAT.sorte, 4);
     c.recompensa = RECOMPENSA.cura;
     c.recompensa_valor = 8;
@@ -176,6 +199,7 @@ function criar_deck_jogo() {
     c = new Card();
     c.name = "Treino Improvisado";
     c.description = "Restos de uma arena de treino. Dá para aprender algo antes de seguir.";
+    c.sprite_interacao = spr_cenario_base;   // NOVO
     carta_opcoes(c, STAT.vitalidade, 4, STAT.forca, 3, STAT.carisma, 3);
     c.recompensa = RECOMPENSA.stat;
     c.recompensa_stat = STAT.forca;
@@ -230,6 +254,7 @@ function criar_carta_fixa() {
     if (d == -1) {
         c.name = "Ruínas Vazias";
         c.description = "Ninguém reivindicou este ponto da trilha. Ainda.";
+        c.sprite_interacao = spr_cenario_base;   // NOVO
         carta_opcoes(c, STAT.tecnica, 3, STAT.sorte, 3, STAT.imaginacao, 3);
         c.recompensa_valor = 3;
         c.fail_tempo = 2;
@@ -238,6 +263,7 @@ function criar_carta_fixa() {
         c.description = "O trabalho das gerações anteriores ergueu este abrigo. Há água, comida e um lugar para descansar.";
         c.origin = d + 1;
         c.tipo = CARD_TIPO.posto;
+        c.sprite_interacao = spr_cenario_base;   // NOVO
     } else {
         c.name = "Posto da Facção " + string(d + 1);
         c.description = "Outra facção fincou bandeira aqui, graças aos recursos que ela entregou. Eles não deixam estranhos passarem.";
@@ -261,6 +287,7 @@ function acao_iniciar_run(_fac) {
     custo_contornar = 3;
 
     player = new Personagem("Sobrevivente F" + string(_fac + 1));
+    visual_fixo(player, CLASSE.sobrevivente, origem_da_faccao(_fac), lib_player[_fac], noone);   // NOVO
     player.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
     party_membro = noone;
 
@@ -284,6 +311,7 @@ function acao_iniciar_run(_fac) {
     inimigos = [];
     popups = [];
     carta_atual = undefined;
+    figura_evento = undefined;   // NOVO
     ultima_carta = undefined;
     carta_resolvida = false;
     card_msg = "";
@@ -347,6 +375,17 @@ function acao_mostrar_card(_c) {
     card_anim = 0;
     estado = GAME_STATE.card;
 
+    // NOVO: define a figura do painel de evento
+    figura_evento = undefined;
+    if (_c.tipo == CARD_TIPO.hostil) {
+        montar_inimigos(_c);
+        figura_evento = inimigos[0];
+    } else if (_c.tipo == CARD_TIPO.amigavel) {
+        figura_evento = aliado_novo(_c.aliado_nome, _c.origin);
+    } else if (_c.sprite_interacao == noone) {
+        figura_evento = figurante_novo(_c.origin);
+    }
+
     switch (_c.tipo) {
         case CARD_TIPO.hostil:
             carta_resolvida = true;
@@ -403,7 +442,9 @@ function acao_aplicar_recompensa(_c) {
             return "+" + string(_c.recompensa_valor) + " " + stat_nomes[_c.recompensa_stat] + " até o fim da expedição.";
         case RECOMPENSA.aliado:
             if (party_membro == noone) {
-                party_membro = aliado_novo(_c.aliado_nome);
+                // ALTERADO: reaproveita o aliado que apareceu na carta (mesmo visual)
+                if (_c.tipo == CARD_TIPO.amigavel) party_membro = figura_evento;
+                else party_membro = aliado_novo(_c.aliado_nome, _c.origin);
                 return _c.aliado_nome + " se juntou ao seu grupo!";
             }
             recurso += 3;

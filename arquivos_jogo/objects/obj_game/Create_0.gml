@@ -1,5 +1,9 @@
+////obj_game create
 display_set_gui_size(1280, 720);
 randomize();
+
+// 1. PRIMEIRO: Inicialize a biblioteca de sprites para que todas as variáveis globais/locais de sprites existam
+criar_biblioteca_sprites();  // MOVIDO PARA CÁ
 
 tempo_max = 50;
 nivel_max_expedicao = 10;
@@ -11,7 +15,10 @@ origem_cores = [c_white, c_red, c_aqua, c_orange, c_fuchsia];
 
 estoque_faccoes = array_create(FACTION.count, 0);
 reserva = 0;
-deck_global = criar_deck_jogo();
+
+// 2. AGORA sim, crie o deck, pois os sprites já foram definidos acima
+deck_global = criar_deck_jogo(); 
+
 upgrades = criar_upgrades();
 upgrades_comprados = array_create(array_length(upgrades), false);
 
@@ -43,6 +50,7 @@ c_recompensa = 0;
 c_resultado = COMBAT_RES.nenhum;
 
 ultima_carta = undefined;
+figura_evento = undefined;   // NOVO
 msg_fim = "";
 
 acao_iniciar_run(FACTION.faction_1);
