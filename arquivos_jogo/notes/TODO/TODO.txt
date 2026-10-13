@@ -6,57 +6,127 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
 
 ## Guia de tags
 
-- **feat:** Adiciona, ajusta ou remove alguma nova feature  
-- **fix:** Corrige um bug no sistema  
+- **feat:** Adiciona, ajusta ou remove alguma nova feature
+- **fix:** Corrige um bug no sistema
 - **refactor:** Reestrutura o código para ficar mais limpo ou otimizado
 - **docs:** Mudanças apenas na documentação do projeto
-- **chore:** Mudanças não específicadas anteriormente
+- **chore:** Mudanças não especificadas anteriormente
 
 ## A fazer
 
-- [ ] FEAT: Criar variáveis de instância nos obj_set_status para salvar seus dados em uma struct global.status_player
+### Essencial para a entrega (sex 16/10, 13h)
 
-- [ ] FEAT: Criar lista de ações que afetam positivamente ou negativamente um grupo
+- [ ] FEAT: Fazer upgrades, e inventário de recurso ser único por facção
+  - No momento, está tudo sendo salvo numa única pool genérica, pegar um upgrade em uma facção libera ele em todas as outras
 
-- [ ] FEAT: Definir os status iniciais do player
+- [ ] FIX: Testar o protótipo de ponta a ponta e corrigir o que quebrar
+  - Ordem: expedição → evento → combate → NPC/aliado → fim de run → preparação → posto do nível 5
 
-- [ ] FEAT: Escolha de skills iniciais
-  - Dispor 3 cartas ao jogador e permitir a escolha de 1 para aprimorar um status
-  - Escolha de classe com base no cenário atual da equipe (?)
+- [ ] FEAT: Balancear tempo, HP e dano
+  - Conferir se o relógio aperta de verdade (o final por tempo precisa ser possível)
+  - Valores em `tempo_max`, `skill_nova` e `inimigo_novo`
 
-- [ ] FEAT: Criar o inventário do jogador, onde ele guarda recursos, equipamentos e afins
+- [ ] FEAT: Mensagem de "o que mudou no mundo" na tela de fim de run
+  - Hoje só mostra os recursos entregues
+  - Deve contar o efeito das vidas passadas
+  - Exemplo: "o grupo COR se inspirou em sua história e dominou o posto do nível 5, mas não há mais minério disponível"
 
-- [ ] FEAT: Sistema de apresentação de cartas de ação
-  - Coleta de recursos na sua área (reduz os recursos da próxima geração)
-  - Invasão de área de outra equipe para coletar seus recursos (exige habilidade de ataque)
+- [ ] FEAT: Cards das ações de facção
+  - Coleta de recursos na própria área (reduz os recursos da próxima geração)
+  - Invasão de área de outra facção (exige skill de ataque)
   - Estudo de produção de armas (custa recurso)
-  - Plantio (custa recurso, mas ganha recurso a longo prazo)
-  - Pensar em mais ações
+  - Cada ação deve mexer em `estoque_faccoes` ou em algum estado do mundo, senão a herança entre vidas continua só no nível 5
 
-- [ ] FEAT: Sistema de eventos
-  - As ações do player podem levar a efeitos futuros, que acontecem TEMPO após a escolha. Mais de um evento pode acontecer no mesmo período, contanto que não sejam opostos
-  - Briga contra outra facção
-  - Encontro amigável com NPC
-  - Resultado das pesquisas
-  - Eventos ambientais aleatórios
+- [ ] FEAT: Tutorial (telas simples de texto)
 
-- [ ] FEAT: Tela de morte após fim do TEMPO e atribuição de uma nova equipe na reencarnação
-  - Exibir uma mensagem do que mudou no ambiente enquanto vc estava em outro plano
-  - Exemplo: "o grupo COR se inspirou em sua história para criar novas armas, criando um forte exército, mas não há mais minério disponível."
+- [ ] DOCS: Mostrar onde aparece cada parte do tema (pessoas, comunidades, natureza e tecnologia)
+  - Tecnologia ainda não tem lugar definido no jogo
+
+### Se der tempo
+
+- [ ] FEAT: Mais pontos fixos que mudam conforme as vidas anteriores
+  - Hoje só o nível 5 muda
+  - Ideal: 2 ou 3 pontos, incluindo um assentamento que reseta o timer uma vez
+
+- [ ] FEAT: Status iniciais diferentes por facção
+  - Hoje todos começam com 3 em tudo e as skills Golpe e Tiro Preciso
+
+- [ ] FEAT: Escolha de skill inicial entre 3 opções
+  - Hoje isso é feito pelos upgrades da tela de preparação (só 1 slot extra)
+
+- [ ] FEAT: Aprender skill nova durante a run
+  - Com os 3 slots cheios, o jogador escolhe qual esquecer (estilo Pokémon)
+  - Hoje a nova skill substitui o último slot
+
+- [ ] FEAT: Efeitos com atraso
+  - Uma ação de hoje gera um evento TEMPO depois
+  - Serviria para "resultado das pesquisas" e para o plantio
+
+- [ ] FEAT: Eventos ambientais aleatórios de verdade
+  - Hoje os eventos são só cards sorteados do deck
+
+- [ ] FEAT: Missões de NPC e mais encontros amigáveis
+
+- [ ] FEAT: Fugir do combate e skills de defesa
+
+- [ ] FEAT: Mais inimigos, skills, cards e upgrades
+  - Guia de como adicionar está na conversa (enums em `scr_game_defs`, dados em `scr_game_logic`)
 
 - [ ] FEAT: Sistema de finais
-  - Após o usuário fazer X pontos em alguma categoria, mostra uma tela com sua categoria ao longo das vidas
-  - Pesquisador
-  - Aventureiro
-  - Guerreiro
-  - pensar em mais categorias
+  - Contar pontos por tipo de ação ao longo das vidas
+  - Ao atingir X pontos numa categoria, mostrar a tela do final
+  - Categorias: Pesquisador, Aventureiro, Guerreiro (pensar em mais)
+
+- [ ] FEAT: Sitema de áudio (pra não ter que usar só o nativo do gamemaker)
+  - Função para chamar arquivo de música, e parar a anterior
+  - Função para tocar sound effect
 
 ### Arte necessária (até o momento)
 
 - [ ] Logo do jogo
 - [ ] Background do menu
 - [ ] Estilo de botões do menu
+- [ ] Sprite do jogador e do aliado
+- [ ] Sprites dos inimigos (besta, saqueador, sentinela, rato mutante, guarda do posto)
+- [ ] Sprites dos eventos e NPCs (hoje são placeholders de texto)
+- [ ] Background da área (Ruínas de Setor 04)
+- [ ] Cores ou emblemas das 3 facções
 
 ## Em produção
 
-> não há nada em produção
+- [ ] Teste do protótipo jogável (código escrito, ainda não rodou)
+
+## Implementado (falta testar)
+
+- [x] Loop de expedição em trilha de 10 níveis (evento → standby → evento), com retorno à base pagando 1 de tempo por nível
+- [x] Relógio de tempo como recurso central, com barra animada no HUD
+- [x] Cards de evento com 4 escolhas: 3 baseadas em stat e 1 que só custa tempo (contornar)
+  - Teste de stat com rolagem de sorte como segunda chance (limitada a 60%)
+  - Recompensas: recurso, cura do grupo, bônus de stat ou aliado
+- [x] Status iniciais do player (6 stats em 3, HP separado = 10 + 3 × VIT) e skills iniciais
+- [x] Skills como habilidades ativas com custo de tempo, stat de scaling e tipo (dano ou cura)
+- [x] Combate estilo Darkest Dungeon
+  - Escolha de habilidade e clique no alvo, para o jogador e para 1 aliado
+  - Fila ordenada pelo custo de tempo, com desempate fixo
+  - Tempo da rodada = maior custo entre as skills executadas
+  - Vitória, derrota e fim por tempo esgotado
+- [x] HP persistente na run (reseta na próxima vida), com evento de cura e posto de descanso
+- [x] 4 tipos de inimigo comuns + guarda do posto, em cards de combate forçado (até 2 inimigos)
+- [x] Encontro amigável com NPC: o sucesso recruta um aliado (limite de 1)
+- [x] Tela de fim de run (retorno, trilha completa, tempo esgotado ou derrota) e reencarnação na próxima facção
+- [x] Estoque de recursos por facção + reserva compartilhada
+- [x] Tela de preparação com 8 upgrades permanentes
+  - Modificadores de run: tempo inicial, custo de retorno, custo de contornar, stats
+  - Skills iniciais (limitadas a 1 slot extra)
+- [x] Herança entre vidas no nível 5 (ponto fixo)
+  - Ruína vazia se ninguém entregou recursos
+  - Posto da sua facção (restaura tempo e HP) se ela domina
+  - Posto hostil de outra facção, com combate, se for dominado por ela
+- [x] HUD com hover (barra deslizante), card e HUD deslizando, tooltip de skill, números flutuantes e barras de HP animadas
+- [x] Correções: botão de retorno invisível, mensagem de tempo esgotado nunca exibida, sorte sem limite e nível 1 sem card
+
+## Cortado ou mudou de forma
+
+- Inventário: removido. Recursos viram um contador e itens viram recompensas que alteram stats direto
+- Mapa estilo Fallout: substituído pela trilha de níveis
+- Escolha de classe com base no cenário da equipe: não existe no sistema atual

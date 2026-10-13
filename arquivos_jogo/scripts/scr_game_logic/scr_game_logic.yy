@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_game_logic",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_game_logic",
+  "parent":{
+    "name":"RUN",
+    "path":"folders/Scripts/RUN.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
