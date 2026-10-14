@@ -26,25 +26,25 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
   - Conferir se o relógio aperta de verdade (o final por tempo precisa ser possível)
   - Valores em `tempo_max`, `skill_nova` e `inimigo_novo`
 
-- [ ] FEAT: Mensagem de "o que mudou no mundo" na tela de fim de run
+- [x] FEAT: Mensagem de "o que mudou no mundo" na tela de fim de run
   - Hoje só mostra os recursos entregues
   - Deve contar o efeito das vidas passadas
   - Exemplo: "o grupo COR se inspirou em sua história e dominou o posto do nível 5, mas não há mais minério disponível"
 
-- [ ] FEAT: Cards das ações de facção
+- [x] FEAT: Cards das ações de facção
   - Coleta de recursos na própria área (reduz os recursos da próxima geração)
   - Invasão de área de outra facção (exige skill de ataque)
   - Estudo de produção de armas (custa recurso)
   - Cada ação deve mexer em `estoque_faccoes` ou em algum estado do mundo, senão a herança entre vidas continua só no nível 5
 
-- [ ] FEAT: Tutorial (telas simples de texto)
+- [x] FEAT: Tutorial (telas simples de texto)
 
 - [ ] DOCS: Mostrar onde aparece cada parte do tema (pessoas, comunidades, natureza e tecnologia)
-  - Tecnologia ainda não tem lugar definido no jogo
+  - Tecnologia ainda não tem lugar definido no jogo ;;; que
 
 ### Se der tempo
 
-- [ ] FEAT: Mais pontos fixos que mudam conforme as vidas anteriores
+- [x] FEAT: Mais pontos fixos que mudam conforme as vidas anteriores
   - Hoje só o nível 5 muda
   - Ideal: 2 ou 3 pontos, incluindo um assentamento que reseta o timer uma vez
 
@@ -58,16 +58,9 @@ Todos os envolvidos no desenvolvimento podem adicionar tarefas aqui. Coloque @se
   - Com os 3 slots cheios, o jogador escolhe qual esquecer (estilo Pokémon)
   - Hoje a nova skill substitui o último slot
 
-- [ ] FEAT: Efeitos com atraso
-  - Uma ação de hoje gera um evento TEMPO depois
-  - Serviria para "resultado das pesquisas" e para o plantio
-
-- [ ] FEAT: Eventos ambientais aleatórios de verdade
-  - Hoje os eventos são só cards sorteados do deck
-
 - [ ] FEAT: Missões de NPC e mais encontros amigáveis
 
-- [ ] FEAT: Fugir do combate e skills de defesa
+- [x] FEAT: Fugir do combate e skills de defesa
 
 - [ ] FEAT: Mais inimigos, skills, cards e upgrades
   - Guia de como adicionar está na conversa (enums em `scr_game_defs`, dados em `scr_game_logic`)

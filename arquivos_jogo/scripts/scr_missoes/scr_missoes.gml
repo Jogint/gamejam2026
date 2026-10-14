@@ -60,9 +60,21 @@ function criar_missoes() {
     m = missao_nova(f4, "Eliminar a Ninhada Alfa", "A ninhada alfa espera no nível 8.", MISSAO_TIPO.combate, 8);
     m.inimigos = [ENEMY_ID.besta, ENEMY_ID.besta];
     m.recompensa = 4;
-    m = missao_nova(f4, "Rastrear o Colosso", "Na área mais avançada da trilha, algo enorme espera você.", MISSAO_TIPO.combate, 10);
+    // ALTERADO: o chefe agora vem do último nível do Coração do Setor (criar_carta_chefe), sem nível/área aqui
+    m = missao_nova(f4, "Rastrear o Colosso", "No coração do setor, algo enorme espera você.", MISSAO_TIPO.combate, -1);
     m.inimigos = [ENEMY_ID.colosso];
     m.recompensa = 10;
+
+    // NOVO: em que área cada missão acontece
+    for (var k = 0; k < 5; k++) {
+        f1[k].area = AREA.ini_1;
+        f2[k].area = AREA.ini_2;
+        f3[k].area = AREA.ini_3;
+    }
+    f4[0].area = AREA.av_12;
+    f4[1].area = AREA.av_23;
+    f4[2].area = AREA.av_31;
+    f4[3].area = AREA.meio;
 
     return [f1, f2, f3, f4];
 }
@@ -99,6 +111,11 @@ function faccao_pode_missao(_d) {
     return (relacao[faccao_atual][origem_da_faccao(_d)] >= RELACAO_ALIADA);
 }
 
+// missão desbloqueada = aparece na tela de missões
+function missao_visivel(_d, _i) {
+    return (faccao_pode_missao(_d) && !missao_bloqueada(_d, _i));
+}
+
 function missao_selecionada(_d, _i) {
     return (missao_sel != undefined && missao_sel.d == _d && missao_sel.i == _i);
 }
@@ -133,16 +150,18 @@ function missao_status(_d, _i) {
     if (missao_selecionada(_d, _i)) return { txt: "SELECIONADA para a próxima run", cor: c_yellow };
     if (missao_ativa_tipo(m)) return { txt: "Clique para selecionar", cor: c_aqua };
     if (m.tipo == MISSAO_TIPO.unica) return { txt: missao_progresso_texto(_d), cor: c_ltgray };
+    if (m.nivel_alvo < 0) return { txt: "Automática (no fim do mapa)", cor: c_ltgray };
     return { txt: "Automática (nível " + string(m.nivel_alvo) + ")", cor: c_ltgray };
 }
 
-// qual missão tem evento fixo neste nível? (undefined se nenhuma)
+// ALTERADO: qual missão tem evento fixo neste nível DA ÁREA ATUAL? (undefined se nenhuma)
 function missao_no_nivel(_n) {
     for (var d = 0; d < TOTAL_FACCOES; d++) {
         if (!faccao_pode_missao(d)) continue;
         for (var i = 0; i < 5; i++) {
             var m = missoes[d][i];
             if (m.concluida || m.nivel_alvo != _n) continue;
+            if (m.area != area_atual) continue;   // NOVO
             if (missao_bloqueada(d, i)) continue;
             if (missao_ativa_tipo(m)) {
                 if (run_missao == undefined || run_missao.d != d || run_missao.i != i) continue;
@@ -224,6 +243,10 @@ function missao_concluir(_d, _i, _premiar) {
         recurso += m.recompensa;
         criar_popup("Missão concluída! +" + string(m.recompensa) + " recursos", 640, 300, c_yellow);
     }
+
+    // NOVO: concluir a missão única = final da facção (a cutscene toca no Step do obj_game)
+    if (_i == 4) final_pendente = _d;
+
     missao_checar_finais();
 }
 
@@ -248,9 +271,10 @@ function missao_checar_finais() {
     }
 }
 
-// ================= ENTREGA (SKILL DE CARGA) =================
+// ================= ENTREGA (SKILL DE MISSÃO) =================
 function acao_dar_carga(_m) {
-    var s = new Skill("Carga: " + _m.carga_nome, 0, 0, STAT.forca, SKILL_TIPO.carga);
+    var s = new Skill("Carga: " + _m.carga_nome, 0, 0, STAT.forca, SKILL_TIPO.dano);
+    s.cat = SKILL_CAT.missao;
     if (array_length(player.skills) < player.max_skills) {
         array_push(player.skills, s);
     } else {
@@ -262,7 +286,7 @@ function acao_dar_carga(_m) {
 
 function acao_remover_carga() {
     for (var i = 0; i < array_length(player.skills); i++) {
-        if (player.skills[i].tipo == SKILL_TIPO.carga) {
+        if (player.skills[i].cat == SKILL_CAT.missao) {
             if (skill_deslocada != undefined) {
                 player.skills[i] = skill_deslocada;
                 skill_deslocada = undefined;
@@ -304,7 +328,7 @@ function pos_vitoria_carta() {
     var c = carta_atual;
     if (c == undefined) return;
 
-    // missão de combate (inclui o boss)
+    // missão de combate (inclui o chefe final)
     if (c.missao_f >= 0) missao_concluir(c.missao_f, c.missao_i, true);
 
     // ponto fixo hostil: conta para a dominação da Facção 2
@@ -341,7 +365,7 @@ function texto_dialogo_lider() {
     }
 
     var t = texto_lider_flavor(f) + "\n\n";
-    t += "Missão única: " + m.nome + "\n" + missao_progresso_texto(f) + "\n";
+    t += "Missão única: " + (missao_bloqueada(f, 4) ? "???" : m.nome) + "\n" + missao_progresso_texto(f) + "\n";
     t += "Missões concluídas: " + string(feitas) + " / 5\n\nRelações:\n";
     for (var o = 1; o <= TOTAL_FACCOES; o++) {
         if (o == origem_da_faccao(f)) continue;

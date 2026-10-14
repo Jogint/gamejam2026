@@ -1,10 +1,9 @@
-////obj_game create
 display_set_gui_size(1280, 720);
 randomize();
 
-tempo_max = 50;
-nivel_max_expedicao = 10;
-nivel_fixo = 5;
+tempo_max = 999888;
+nivel_max_expedicao = 10;   // sobrescrito por area_aplicar() ao iniciar a run
+nivel_fixo = 5;             // idem
 slots_upg = 1;
 
 stat_nomes = ["VIT", "FOR", "IMA", "TEC", "SOR", "CAR"];
@@ -12,22 +11,22 @@ origem_cores = [c_white, c_red, c_aqua, c_orange, c_fuchsia];
 
 // por facção
 estoque_faccoes = array_create(FACTION.count, 0);
-reserva = array_create(FACTION.count, 0);                    // ALTERADO
+reserva = array_create(FACTION.count, 0);
 deck_global = criar_deck_jogo();
 upgrades = criar_upgrades();
-upgrades_comprados = [];                                     // ALTERADO
+upgrades_comprados = [];
 for (var f = 0; f < FACTION.count; f++) {
     array_push(upgrades_comprados, array_create(array_length(upgrades), false));
 }
-alt_recurso = false;                                         // NOVO: final da F1 (efeito a definir)
+alt_recurso = false;   // final da F1 (efeito a definir)
 
-// NOVO: relação de cada facção jogável com cada origem
+// relação de cada facção jogável com cada origem
 relacao = [];
 for (var g = 0; g < FACTION.count; g++) {
     array_push(relacao, array_create(CARD_ORIGIN.count, 0));
 }
 
-// NOVO: missões
+// missões
 missoes = criar_missoes();
 missao_sel = undefined;
 run_missao = undefined;
@@ -36,6 +35,29 @@ carga_ativa = false;
 skill_deslocada = undefined;
 aliados = [];
 prep_tela = PREP_TELA.menu;
+
+// NOVO: mapa
+areas = criar_areas();
+area_atual = 0;
+area_anterior = -1;
+nivel_total = 0;
+
+// NOVO: finais
+final_pendente = -1;   // facção cujo final deve tocar (-1 = nenhum)
+fim_jogo = false;
+fim_tipo = 0;
+
+// NOVO: cutscenes / tutoriais
+cs_ativa = false;
+cs_id = 0;
+cs_slides = [];
+cs_idx = 0;
+cs_texto = "";
+cs_chars = 0;
+cs_anim = 0;
+cs_fechando = false;
+cs_fila = [];
+tut_visto = array_create(CUT.count, false);
 
 // mouse e hover
 mx = 0;
@@ -49,6 +71,7 @@ hud_exp = 0;
 card_anim = 1;
 trilha_vis = 0;
 popups = [];
+particulas = [];
 
 // combate
 inimigos = [];
@@ -69,7 +92,11 @@ figura_evento = undefined;
 msg_fim = "";
 
 criar_biblioteca_sprites();
-lideres = criar_lideres();                                   // NOVO
+lideres = criar_lideres();
 
 acao_iniciar_run(FACTION.faction_1);
-estado = GAME_STATE.preparacao;                              // NOVO: começa no hub
+estado = GAME_STATE.preparacao;   // começa no hub
+
+// NOVO: abertura
+cutscene_tocar(CUT.intro);
+cutscene_tocar(CUT.tut_preparacao);

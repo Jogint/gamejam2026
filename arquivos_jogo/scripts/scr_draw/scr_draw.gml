@@ -1,4 +1,3 @@
-
 // botão genérico: a barra clara "desliza" da esquerda no hover
 function draw_botao(_b, _txt, _cor, _cor_txt, _hv_id, _ativo) {
     var h = (_hv_id >= 0) ? hover_anim[_hv_id] : 0;
@@ -23,7 +22,7 @@ function draw_botao(_b, _txt, _cor, _cor_txt, _hv_id, _ativo) {
 }
 
 // desenha o personagem com os pés em (_x, _y). Origem dos sprites: embaixo no centro.
-// ALTERADO: _flip espelha o sprite (lado inimigo / painel da direita)
+// _flip espelha o sprite (lado inimigo / painel da direita)
 function draw_personagem(_p, _x, _y, _esc, _overworld, _flip) {
     var vivo = (_p.hp > 0);
     var cor = _p.importante ? c_white : _p.cor;   // importante já vem colorido: não pinta
@@ -67,7 +66,7 @@ function draw_hp_barra(_x1, _y1, _x2, _y2, _p) {
     draw_set_halign(fa_left);
 }
 
-// ALTERADO: slot mais estreito (135 px) e parâmetro _flip
+// slot mais estreito (135 px) e parâmetro _flip
 function draw_slot_personagem(_b, _p, _hv_id, _valido, _flip) {
     var sx = (_p.flash > 0) ? irandom_range(-4, 4) : 0;
     var x1 = _b[0] + sx;
@@ -103,6 +102,15 @@ function draw_slot_personagem(_b, _p, _hv_id, _valido, _flip) {
     if (!vivo) draw_text((x1 + x2) / 2, y1 + 80, "[ Derrotado ]");
     draw_set_halign(fa_left);
 
+    // NOVO: status ativos (sigla + duração; no atordoamento é o nº de turnos perdidos)
+    if (vivo) {
+        for (var s = 0; s < array_length(_p.status); s++) {
+            var st = _p.status[s];
+            draw_set_color(status_cor(st.ef));
+            draw_text(x1 + 6, y1 + 28 + s * 18, status_sigla(st.ef) + " " + string(st.dur));
+        }
+    }
+
     draw_hp_barra(x1 + 10, y2 - 42, x2 - 10, y2 - 24, _p);
 }
 
@@ -116,7 +124,7 @@ function draw_paineis() {
 
     if (estado == GAME_STATE.combat) return;
 
-    // ALTERADO: grupo em fila (o líder fica à direita, perto do centro)
+    // grupo em fila (o líder fica à direita, perto do centro)
     draw_set_halign(fa_center);
     draw_text(180, 40, player.nome);
     var g = get_grupo();
@@ -157,17 +165,7 @@ function draw_trilha() {
     draw_set_color(c_white);
 }
 
-function draw_expedicao() {
-    draw_set_halign(fa_center);
-    draw_set_color(c_white);
-    draw_text(640, 150, nome_area + " - Nível " + string(nivel_expedicao) + " / " + string(nivel_max_expedicao));
-    draw_set_halign(fa_left);
 
-    var fim_trilha = (nivel_expedicao >= nivel_max_expedicao);
-    draw_botao(box_avancar(), fim_trilha ? "Concluir a Trilha" : "Avançar na Expedição", c_lime, c_black, HV.avancar, true);
-    draw_botao(box_retorno(), "Retornar à Base (Custa " + string(calcular_custo_retorno()) + " Tempo)", c_orange, c_black, HV.retorno, pode_retornar());
-    draw_trilha();
-}
 
 function texto_recompensa(_c) {
     switch (_c.recompensa) {
@@ -175,7 +173,7 @@ function texto_recompensa(_c) {
         case RECOMPENSA.cura:    return "+" + string(_c.recompensa_valor) + " HP para o grupo";
         case RECOMPENSA.stat:    return "+" + string(_c.recompensa_valor) + " " + stat_nomes[_c.recompensa_stat];
         case RECOMPENSA.aliado:  return "Novo aliado: " + _c.aliado_nome;
-        case RECOMPENSA.relacao: return "Relação +1 com a Facção " + string(_c.origin);   // NOVO
+        case RECOMPENSA.relacao: return "Relação +1 com a Facção " + string(_c.origin);
     }
     return "";
 }
@@ -200,7 +198,7 @@ function draw_card() {
         case CARD_TIPO.hostil:   tag = "COMBATE"; break;
         case CARD_TIPO.amigavel: tag = "ENCONTRO AMIGÁVEL"; break;
         case CARD_TIPO.posto:    tag = "POSTO"; break;
-        case CARD_TIPO.missao:   tag = "MISSÃO"; break;   // NOVO
+        case CARD_TIPO.missao:   tag = "MISSÃO"; break;
     }
     draw_set_halign(fa_right);
     draw_text(b[2] - 20, b[1] + 15, tag);
@@ -214,7 +212,7 @@ function draw_card() {
     if (c.tipo == CARD_TIPO.hostil) {
         draw_set_color(c_aqua);
         draw_text(b[0] + 20, b[1] + 190, "Vitória: +" + string(c.recompensa_valor) + " Recursos");
-    } else if (c.tipo == CARD_TIPO.evento || c.tipo == CARD_TIPO.amigavel) {   // ALTERADO
+    } else if (c.tipo == CARD_TIPO.evento || c.tipo == CARD_TIPO.amigavel) {
         draw_set_color(c_aqua);
         draw_text(b[0] + 20, b[1] + 190, "Sucesso: " + texto_recompensa(c));
         draw_set_color(c_orange);
@@ -236,12 +234,12 @@ function draw_card() {
     draw_set_color(c_white);
 }
 
-// ALTERADO: layout horizontal 4v4 (grupo à esquerda, inimigos espelhados à direita)
+// layout horizontal 4v4 (grupo à esquerda, inimigos espelhados à direita)
 function draw_combate() {
     var g = get_grupo();
     var sk = skill_selecionada();
-    var alvo_dano = (sk != undefined && sk.tipo == SKILL_TIPO.dano);
-    var alvo_cura = (sk != undefined && sk.tipo == SKILL_TIPO.cura);
+    var alvo_dano = (sk != undefined && skill_hostil(sk));    // ALTERADO
+    var alvo_cura = (sk != undefined && !skill_hostil(sk));   // ALTERADO
 
     for (var i = 0; i < array_length(g); i++) {
         draw_slot_personagem(box_slot_party(i), g[i], HV.alvo + 4 + i, alvo_cura && g[i].hp > 0, false);
@@ -281,7 +279,7 @@ function draw_combate() {
             else if (q < c_idx) cor = c_gray;
         }
         draw_set_color(cor);
-        draw_text(30, 284 + q * 22, "[t" + string(a.skill.tempo) + "] " + a.ator.nome + " > " + a.skill.nome + " > " + a.alvo.nome);
+        draw_text(30, 284 + q * 22, "[t" + string(a.tempo) + "] " + a.ator.nome + " > " + a.skill.nome + " > " + a.alvo.nome);   // ALTERADO: tempo já com status
     }
 
     // log
@@ -292,25 +290,43 @@ function draw_combate() {
     draw_set_color(c_white);
 }
 
+// NOVO: texto de efeito da skill (curto, cabe no tooltip)
+function skill_resumo(_s, _st) {
+    var v = _s.base + _st;
+    var t = "";
+    switch (_s.tipo) {
+        case SKILL_TIPO.dano:      t = "Dano " + string(v) + " [" + string(_s.base) + "+" + stat_nomes[_s.stat] + " " + string(_st) + "]"; break;
+        case SKILL_TIPO.cura:      t = "Cura " + string(v) + " [" + string(_s.base) + "+" + stat_nomes[_s.stat] + " " + string(_st) + "]"; break;
+        case SKILL_TIPO.restaurar: t = "Cura " + string(v) + " e remove status ruins"; break;
+        case SKILL_TIPO.buff:      t = "Reforça o aliado"; break;
+        case SKILL_TIPO.debuff:    t = "Enfraquece o inimigo"; break;
+        case SKILL_TIPO.recarga:   t = "Reduz " + string(_s.base) + " de recarga do grupo"; break;
+    }
+    switch (_s.alcance) {
+        case ALCANCE.adjacente: t += "  |  área (adjacentes: metade)"; break;
+        case ALCANCE.global:    t += "  |  todos"; break;
+    }
+    if (_s.efeito != -1) t += "  |  " + status_nome(_s.efeito) + " (" + string(_s.ef_dur) + ")";
+    return t;
+}
+
+// ALTERADO: categoria, recarga, efeito e status
 function draw_skill_info(_ator, _k, _x, _y) {
     var s = _ator.skills[_k];
 
-    // NOVO: skill de carga
-    if (s.tipo == SKILL_TIPO.carga) {
-        draw_set_color(c_white);
+    draw_set_color(c_white);
+    if (s.cat == SKILL_CAT.missao) {
         draw_text(_x, _y, s.nome);
         draw_set_color(c_ltgray);
-        draw_text(_x, _y + 24, "Carga de missão: não pode ser usada em combate.");
+        draw_text(_x, _y + 24, "Skill de missão: não faz nada em combate.");
         return;
     }
 
     var st = stat_total(_ator, s.stat);
-    var v = s.base + st;
-
-    draw_set_color(c_white);
-    draw_text(_x, _y, s.nome + "  |  Tempo: " + string(s.tempo) + "  |  " + ((s.tipo == SKILL_TIPO.dano) ? "Dano: " : "Cura: ") + string(v));
+    var cd_txt = (s.cd_max > 0) ? ("  |  Recarga: " + string(s.cd_max)) : "";
+    draw_text(_x, _y, s.nome + "  |  " + nome_categoria_skill(s.cat) + "  |  Tempo: " + string(s.tempo) + cd_txt);
     draw_set_color(c_ltgray);
-    draw_text(_x, _y + 24, "Base " + string(s.base) + " + " + stat_nomes[s.stat] + " " + string(st) + ((s.tipo == SKILL_TIPO.dano) ? "  |  alvo: inimigo" : "  |  alvo: aliado"));
+    draw_text(_x, _y + 24, skill_resumo(s, st));
 }
 
 function draw_hud() {
@@ -338,11 +354,12 @@ function draw_hud() {
             draw_set_alpha(1);
         } else if (hover >= HV.skill && hover < HV.skill + 3) {
             var tb = box_skill(ks);
+            var tx = min(tb[0], 660);   // ALTERADO: caixa mais larga, sem sair da tela
             draw_set_color(c_black);
-            draw_rectangle(tb[0], top - 62, tb[0] + 380, top - 6, false);
+            draw_rectangle(tx, top - 62, tx + 600, top - 6, false);
             draw_set_color(c_white);
-            draw_rectangle(tb[0], top - 62, tb[0] + 380, top - 6, true);
-            draw_skill_info(ator, ks, tb[0] + 10, top - 56);
+            draw_rectangle(tx, top - 62, tx + 600, top - 6, true);
+            draw_skill_info(ator, ks, tx + 10, top - 56);
         }
     }
 
@@ -350,7 +367,7 @@ function draw_hud() {
     draw_set_color(c_white);
     draw_text(30, 570, "Facção Jogável: " + string(faccao_atual + 1) + " / 3");
     draw_text(30, 600, "HP: " + string(player.hp) + " / " + string(p_hp_max(player)));
-    for (var a = 0; a < array_length(aliados); a++) {   // ALTERADO: até 3 aliados
+    for (var a = 0; a < array_length(aliados); a++) {   // até 3 aliados
         draw_text(30, 620 + a * 20, aliados[a].nome + ": " + string(aliados[a].hp) + " / " + string(p_hp_max(aliados[a])));
     }
 
@@ -384,9 +401,26 @@ function draw_hud() {
         draw_rectangle(b[0], b[1] - up, b[2], b[3] - up, false);
         draw_set_color(ativo ? c_yellow : c_white);
         draw_rectangle(b[0], b[1] - up, b[2], b[3] - up, true);
-        draw_set_color(c_white);
+
+        // ALTERADO: nome na cor da categoria; linha 2 com tempo e recarga
+        draw_set_color(cor_categoria_skill(sl.cat));
         draw_text(b[0] + 10, b[1] + 10 - up, sl.nome);
-        draw_text(b[0] + 10, b[1] + 38 - up, (sl.tipo == SKILL_TIPO.carga) ? "Carga" : ("Tempo: " + string(sl.tempo)));   // ALTERADO
+        draw_set_color(c_white);
+        if (sl.cat == SKILL_CAT.missao) {
+            draw_text(b[0] + 10, b[1] + 38 - up, "Missão");
+        } else {
+            draw_text(b[0] + 10, b[1] + 38 - up, "T" + string(sl.tempo) + ((sl.cd_max > 0) ? (" | CD" + string(sl.cd_max)) : ""));
+        }
+
+        // NOVO: em recarga, escurece e mostra os turnos restantes
+        if (sl.cd > 0) {
+            draw_set_alpha(0.7);
+            draw_set_color(c_black);
+            draw_rectangle(b[0], b[1] - up, b[2], b[3] - up, false);
+            draw_set_alpha(1);
+            draw_set_color(c_orange);
+            draw_text(b[0] + 10, b[1] + 24 - up, "Recarga: " + string(sl.cd));
+        }
     }
 
     // recursos e relógio
@@ -416,6 +450,14 @@ function draw_popups() {
     draw_set_color(c_white);
 }
 
+// NOVO: partículas das skills (ficam por cima dos personagens)
+function draw_particulas() {
+    for (var i = 0; i < array_length(particulas); i++) {
+        var p = particulas[i];
+        draw_sprite(p.spr, floor(p.img), p.x, p.y);
+    }
+}
+
 function draw_fim_run() {
     draw_set_color(c_black);
     draw_rectangle(0, 0, 1280, 720, false);
@@ -432,7 +474,7 @@ function draw_fim_run() {
 }
 
 // ================= PREPARAÇÃO (HUB) =================
-// NOVO: painel do líder (sprite overworld)
+// painel do líder (sprite overworld)
 function draw_painel_lider() {
     draw_set_color(c_dkgray);
     draw_rectangle(950, 20, 1250, 520, false);
@@ -464,6 +506,7 @@ function draw_prep_menu() {
     draw_painel_lider();
 }
 
+// ALTERADO: linhas mais baixas (cabem 13 upgrades)
 function draw_prep_upgrades() {
     var vis = upgrades_visiveis();
     var comprados = upgrades_comprados[faccao_atual];
@@ -479,13 +522,13 @@ function draw_prep_upgrades() {
         else draw_botao(b, "", c_dkgray, c_white, HV.upg + i, pode);
 
         draw_set_color((comprado || pode) ? c_white : c_gray);
-        draw_text(b[0] + 15, b[1] + 14, u.nome);
-        draw_text(b[0] + 300, b[1] + 14, u.desc);
+        draw_text(b[0] + 15, b[1] + 8, u.nome);
+        draw_text(b[0] + 300, b[1] + 8, u.desc);
 
         var info = comprado ? "COMPRADO" : ("Custo: " + string(u.custo));
         if (!comprado && u.efeito == UPG_EFEITO.skill && contar_upgrades_skill() >= slots_upg) info = "Sem slot";
         if (!comprado && u.efeito == UPG_EFEITO.unico && missao_bloqueada(FACTION.faction_1, 4)) info = "Bloqueado";
-        draw_text(b[0] + 740, b[1] + 14, info);
+        draw_text(b[0] + 740, b[1] + 8, info);
     }
 
     draw_botao(box_voltar(), "Voltar", c_dkgray, c_white, HV.voltar, true);
@@ -508,16 +551,24 @@ function draw_prep_dialogo() {
     draw_painel_lider();
 }
 
+// ALTERADO: só desenha missões desbloqueadas
 function draw_prep_missoes() {
     draw_set_halign(fa_center);
     for (var c = 0; c < TOTAL_FACCOES; c++) {
-        draw_set_color(origem_cores[c + 1]);
-        draw_text(30 + c * 310 + 150, 85, "Facção " + string(c + 1) + ((c == faccao_atual) ? "  (você)" : ""));
+        var sufixo = "";
+        if (c == faccao_atual) sufixo = "  (você)";
+        else if (!faccao_pode_missao(c)) sufixo = "  (sem aliança)";
+        else sufixo = "  (aliada)";
+
+        draw_set_color(faccao_pode_missao(c) ? origem_cores[c + 1] : c_gray);
+        draw_text(30 + c * 310 + 150, 85, "Facção " + string(c + 1) + sufixo);
     }
     draw_set_halign(fa_left);
 
     for (var c2 = 0; c2 < TOTAL_FACCOES; c2++) {
         for (var r = 0; r < 5; r++) {
+            if (!missao_visivel(c2, r)) continue;   // NOVO
+
             var m = missoes[c2][r];
             var b = box_missao(c2, r);
             var st = missao_status(c2, r);
@@ -538,12 +589,14 @@ function draw_prep_missoes() {
         }
     }
 
-    // descrição da missão sob o mouse
+    // descrição da missão sob o mouse (só se visível)
     if (hover >= HV.missao && hover < HV.missao + TOTAL_FACCOES * 5) {
         var hm = hover - HV.missao;
-        var mm = missoes[hm div 5][hm mod 5];
-        draw_set_color(c_white);
-        draw_text_ext(40, 545, mm.nome + " [" + nome_tipo_missao(mm.tipo) + "]: " + mm.desc, 22, 1200);
+        if (missao_visivel(hm div 5, hm mod 5)) {   // NOVO
+            var mm = missoes[hm div 5][hm mod 5];
+            draw_set_color(c_white);
+            draw_text_ext(40, 545, mm.nome + " [" + nome_tipo_missao(mm.tipo) + "]: " + mm.desc, 22, 1200);
+        }
     }
 
     draw_botao(box_voltar(), "Voltar", c_dkgray, c_white, HV.voltar, true);
@@ -554,7 +607,7 @@ function draw_preparacao() {
     draw_set_color(c_white);
     draw_text(640, 25, "PREPARAÇÃO - Facção " + string(faccao_atual + 1) + " / " + string(FACTION.count));
     draw_set_color(c_aqua);
-    draw_text(640, 60, "Reserva: " + string(reserva[faccao_atual]) + " recursos");   // ALTERADO
+    draw_text(640, 60, "Reserva: " + string(reserva[faccao_atual]) + " recursos");
     draw_set_halign(fa_left);
 
     switch (prep_tela) {
