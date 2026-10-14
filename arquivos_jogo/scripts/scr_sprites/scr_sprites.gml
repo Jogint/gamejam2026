@@ -1,21 +1,69 @@
 // ================= SPRITES / VISUAL DOS PERSONAGENS =================
 
 // Cria as listas de sprites. Chamar UMA vez no Create do obj_game.
+////scr_sprites (ou dentro de scr_draw)
+
+// Cria as listas de sprites. Chamar UMA vez no Create do obj_game.
 function criar_biblioteca_sprites() {
-    // cabeças: lib_cabecas[origem] = lista de cabeças daquela facção
+    // ------------------------------------------------------------------------
+    // CABEÇAS POR FACÇÃO
+    // ------------------------------------------------------------------------
+    // lib_cabecas[origem] = lista de sprites de cabeça daquela facção
     lib_cabecas = array_create(CARD_ORIGIN.count);
-    for (var o = 0; o < CARD_ORIGIN.count; o++) {
-        lib_cabecas[o] = [spr_cabeca_base, spr_cabeca_base];   // depois: algumas cabeças diferentes por facção
-    }
 
-    // corpos: lib_corpos[classe] = sprite com 4 poses (4 subimagens)
-    lib_corpos = array_create(CLASSE.count, spr_corpo_base);
+    // Neutro / Padrão (usa misturado ou a primeira facção como fallback)
+    lib_cabecas[CARD_ORIGIN.neutral] = [
+        spr_bluehead_1, spr_redhead_1, spr_tealhead_1
+    ];
 
-    // player: um sprite fixo por facção jogável
-    lib_player = array_create(FACTION.count, spr_corpo_base);
+    // Facção 1 (Vermelho): redhead 1 a 5
+    lib_cabecas[CARD_ORIGIN.faction_1] = [
+        spr_redhead_1, spr_redhead_2, spr_redhead_3, spr_redhead_4, spr_redhead_5
+    ];
 
-    // NOVO: líderes (sprite overworld) por facção jogável
-    lib_lideres = array_create(FACTION.count, spr_lider_base);
+    // Facção 2 (Azul-esverdeado / Teal): tealhead 1 a 5
+    lib_cabecas[CARD_ORIGIN.faction_2] = [
+        spr_tealhead_1, spr_tealhead_2, spr_tealhead_3, spr_tealhead_4, spr_tealhead_5
+    ];
+
+    // Facção 3 (Azul / Blue): bluehead 1 a 5
+    lib_cabecas[CARD_ORIGIN.faction_3] = [
+        spr_bluehead_1, spr_bluehead_2, spr_bluehead_3, spr_bluehead_4, spr_bluehead_5
+    ];
+
+    // Facção 4 (Lilás): usa os blueheads como fallback/padrão
+    lib_cabecas[CARD_ORIGIN.faction_4] = [
+        spr_bluehead_1, spr_bluehead_2, spr_bluehead_3, spr_bluehead_4, spr_bluehead_5
+    ];
+
+
+    // ------------------------------------------------------------------------
+    // CORPOS POR CLASSE
+    // ------------------------------------------------------------------------
+    // lib_corpos[classe] = sprite com 4 subimagens (idle, atq_basico, dano, habilidade)
+    lib_corpos = array_create(CLASSE.count);
+
+    lib_corpos[CLASSE.sobrevivente] = spr_shielder;   // Exemplo: sobrevivente usa shielder
+    lib_corpos[CLASSE.soldado]      = spr_shielder;
+    lib_corpos[CLASSE.mutante]      = spr_lunatic;
+    lib_corpos[CLASSE.maquina]      = spr_acolyte;
+    lib_corpos[CLASSE.civil]        = spr_ministrel;
+
+
+    // ------------------------------------------------------------------------
+    // PLAYER E LÍDERES
+    // ------------------------------------------------------------------------
+    // Corpos únicos/fixos do jogador por facção jogável
+    lib_player = array_create(FACTION.count);
+    lib_player[FACTION.faction_1] = spr_shielder;
+    lib_player[FACTION.faction_2] = spr_acolyte;
+    lib_player[FACTION.faction_3] = spr_ministrel;
+
+    // Líderes (sprite overworld no hub)
+    lib_lideres = array_create(FACTION.count);
+    lib_lideres[FACTION.faction_1] = spr_shielder;
+    lib_lideres[FACTION.faction_2] = spr_acolyte;
+    lib_lideres[FACTION.faction_3] = spr_ministrel;
 }
 
 // FACTION (0..2) -> CARD_ORIGIN (1..3)
@@ -34,34 +82,34 @@ function cor_da_faccao(_f) {
     var v = 255;
 
     switch (_f) {
-        case CARD_ORIGIN.faction_1:   // vermelho
+        case CARD_ORIGIN.faction_1:   // vermelho (mais desaturado/suave)
             h = irandom_range(-8, 8);
-            s = irandom_range(170, 255);
-            v = irandom_range(180, 240);
+            s = irandom_range(60, 110);   // reduzido de 170-255 para esbranquiçar
+            v = irandom_range(210, 255);  // brilho alto
             break;
-        case CARD_ORIGIN.faction_2:   // azul-esverdeado
+        case CARD_ORIGIN.faction_2:   // azul-esverdeado / teal
             h = irandom_range(116, 132);
-            s = irandom_range(140, 220);
-            v = irandom_range(160, 230);
+            s = irandom_range(50, 100);   // reduzido de 140-220
+            v = irandom_range(200, 250);
             break;
         case CARD_ORIGIN.faction_3:   // azul-marinho
             h = irandom_range(160, 172);
-            s = irandom_range(170, 255);
-            v = irandom_range(130, 190);
+            s = irandom_range(60, 110);   // reduzido de 170-255
+            v = irandom_range(190, 240);
             break;
         case CARD_ORIGIN.faction_4:   // lilás
             h = irandom_range(188, 204);
-            s = irandom_range(90, 150);
-            v = irandom_range(190, 255);
+            s = irandom_range(40, 80);    // tom pastel leve
+            v = irandom_range(220, 255);
             break;
-        default:                      // lilás esbranquecido (neutro)
+        default:                      // neutro (quase branco/cinza claro)
             h = irandom_range(188, 204);
-            s = irandom_range(15, 45);
+            s = irandom_range(5, 25);
             v = irandom_range(235, 255);
             break;
     }
 
-    h = (h + 256) mod 256;   // o vermelho passa de 0 para baixo
+    h = (h + 256) mod 256;
     return make_color_hsv(h, s, v);
 }
 

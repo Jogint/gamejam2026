@@ -1,7 +1,7 @@
 display_set_gui_size(1280, 720);
 randomize();
 
-tempo_max = 999888;
+tempo_max = 100;
 nivel_max_expedicao = 10;   // sobrescrito por area_aplicar() ao iniciar a run
 nivel_fixo = 5;             // idem
 slots_upg = 1;
