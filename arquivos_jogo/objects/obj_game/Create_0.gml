@@ -1,3 +1,6 @@
+hab_iniciar();
+
+
 display_set_gui_size(1280, 720);
 randomize();
 
@@ -12,6 +15,7 @@ origem_cores = [c_white, c_red, c_aqua, c_orange, c_fuchsia];
 // por facção
 estoque_faccoes = array_create(FACTION.count, 0);
 reserva = array_create(FACTION.count, 0);
+for (var f = 0; f < FACTION.count; f++) reserva[f] = 300;
 deck_global = criar_deck_jogo();
 upgrades = criar_upgrades();
 upgrades_comprados = [];
@@ -96,6 +100,7 @@ lideres = criar_lideres();
 
 acao_iniciar_run(FACTION.faction_1);
 estado = GAME_STATE.preparacao;   // começa no hub
+
 
 // NOVO: abertura
 cutscene_tocar(CUT.intro);

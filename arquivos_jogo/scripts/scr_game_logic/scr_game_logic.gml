@@ -57,7 +57,7 @@ function box_upg(_i) {
     return [x1, y1, x1 + 200, y1 + 70]; 
 }
 
-function box_hub(_k) { return [330, 150 + _k * 90, 760, 220 + _k * 90]; }
+function box_hub(_k) { return [330, 130 + _k * 75, 760, 190 + _k * 75]; }
 function box_voltar() { return [40, 640, 240, 690]; }
 function box_missao(_c, _r) {
     var x1 = 30 + _c * 310;
@@ -68,13 +68,21 @@ function box_missao(_c, _r) {
 // ================= DADOS =================
 function skill_nova(_id) {
     static spr_ico = asset_get_index("spr_icon_skill");
+    static spr_cls = asset_get_index("spr_skills");
     var s = skill_nova_dados(_id);
-    s.icone = spr_ico;
-    s.icone_sub = _id;
+    if (_id >= SKILL_ID.mine_basico) {
+        s.icone = spr_cls;
+        s.icone_sub = _id - SKILL_ID.mine_basico;
+    } else {
+        s.icone = spr_ico;
+        s.icone_sub = _id;
+    }
     return s;
 }
 
 function skill_nova_dados(_id) {
+    if (_id >= SKILL_ID.mine_basico) return skill_dados_classes(_id);
+
     switch (_id) {
         case SKILL_ID.golpe:   return new Skill("Golpe", 2, 2, STAT.forca, SKILL_TIPO.dano);
         case SKILL_ID.pancada: return new Skill("Pancada", 3, 4, STAT.forca, SKILL_TIPO.dano);
@@ -119,6 +127,121 @@ function skill_nova_dados(_id) {
             return skill_alcance(skill_cd(new Skill("Cura em Área", 4, 2, STAT.tecnica, SKILL_TIPO.cura), 4), ALCANCE.global);
     }
     return new Skill("???", 1, 1, STAT.forca, SKILL_TIPO.dano);
+}
+
+// Skills das 5 classes (mineirador, menestrel, acólito, escudeiro, lunático)
+function skill_dados_classes(_id) {
+    var s;
+    switch (_id) {
+        // ===== MINEIRADOR =====
+        case SKILL_ID.mine_basico:
+            return new Skill("Picareta", 2, 2, STAT.forca, SKILL_TIPO.dano);
+        case SKILL_ID.mine_superaquecer:   // buff em si: todo dano causado aplica queimadura
+            s = skill_cd(new Skill("Superaquecer", 3, 0, STAT.vitalidade, SKILL_TIPO.buff), 4);
+            s.so_si = true;
+            return skill_efeito(s, STATUS.superaquecido, 3, 0);
+        case SKILL_ID.mine_perfurar:
+            return skill_efeito(skill_cd(new Skill("Perfurar os Céus", 5, 6, STAT.forca, SKILL_TIPO.dano), 3), STATUS.atordoamento, 1, 0);
+        case SKILL_ID.mine_pedra:
+            return skill_alcance(skill_cd(new Skill("Pedra Estranha", 4, 3, STAT.imaginacao, SKILL_TIPO.dano), 3), ALCANCE.adjacente);
+        case SKILL_ID.mine_polvora:
+            return skill_cd(new Skill("Tiro de Pólvora", 3, 3, STAT.tecnica, SKILL_TIPO.dano), 2);
+
+        // ===== MENESTREL =====
+        case SKILL_ID.mene_basico:
+            return new Skill("Dedilhada", 2, 2, STAT.tecnica, SKILL_TIPO.dano);
+        case SKILL_ID.mene_cura:
+            return skill_alcance(skill_cd(new Skill("Canção de Cura", 4, 2, STAT.vitalidade, SKILL_TIPO.cura), 4), ALCANCE.global);
+        case SKILL_ID.mene_desespero:
+            s = skill_alcance(skill_cd(new Skill("Melodia do Desespero", 5, 2, STAT.imaginacao, SKILL_TIPO.dano), 3), ALCANCE.global);
+            s = skill_efeito(s, STATUS.queimadura, 3, 1);
+            s.chance = 0.4;
+            s.efeito2 = STATUS.corrosao;
+            s.ef2_dur = 3;
+            s.ef2_chance = 0.2;
+            return s;
+        case SKILL_ID.mene_detox:
+            s = skill_efeito(skill_cd(new Skill("Rima Desintoxicante", 3, 0, STAT.sorte, SKILL_TIPO.buff), 3), STATUS.regeneracao, 3, 2);
+            s.def_por_sorte = true;
+            return s;
+        case SKILL_ID.mene_banshee:
+            s = skill_cd(new Skill("Lamento da Banshee", 5, 2, STAT.tecnica, SKILL_TIPO.dano), 4);
+            s.instakill = 0.1;
+            return s;
+
+        // ===== ACÓLITO =====
+        case SKILL_ID.acol_basico:
+            return new Skill("Ying", 2, 2, STAT.forca, SKILL_TIPO.dano);
+        case SKILL_ID.acol_yang:
+            s = skill_cd(new Skill("Yang", 4, 3, STAT.vitalidade, SKILL_TIPO.dano), 3);
+            s.espelho = true;
+            return s;
+        case SKILL_ID.acol_punho:
+            s = skill_efeito(skill_cd(new Skill("Punho de Fogo", 3, 3, STAT.tecnica, SKILL_TIPO.dano), 2), STATUS.queimadura, 3, 1);
+            s.chance = 0.5;
+            return s;
+        case SKILL_ID.acol_perdicao:
+            s = skill_efeito(skill_cd(new Skill("Fogo da Perdição", 4, 2, STAT.carisma, SKILL_TIPO.dano), 3), STATUS.corrosao, 3, 1);
+            s.chance = 0.5;
+            return s;
+        case SKILL_ID.acol_raio:
+            s = skill_alcance(skill_cd(new Skill("Raio de Luz", 4, 2, STAT.sorte, SKILL_TIPO.dano), 3), ALCANCE.adjacente);
+            s.cura_adj = true;
+            return s;
+
+        // ===== ESCUDEIRO =====
+        case SKILL_ID.escu_basico:
+            return new Skill("Escudada", 2, 2, STAT.forca, SKILL_TIPO.dano);
+        case SKILL_ID.escu_tartaruga:
+            s = skill_alcance(skill_cd(new Skill("Formação Tartaruga", 3, 0, STAT.vitalidade, SKILL_TIPO.defesa), 4), ALCANCE.global);
+            s.exclui_si = true;
+            return s;
+        case SKILL_ID.escu_refletor:
+            return skill_alcance(skill_cd(new Skill("Escudo Refletor", 5, 3, STAT.forca, SKILL_TIPO.dano), 3), ALCANCE.global);
+        case SKILL_ID.escu_passo:
+            s = skill_cd(new Skill("Passo Rápido", 3, 3, STAT.imaginacao, SKILL_TIPO.dano), 2);
+            s.def_chance = 0.4;
+            s.def_em_si = true;
+            return s;
+        case SKILL_ID.escu_grande:
+            s = skill_efeito(skill_cd(new Skill("Grande Escudo da Luz Reveladora", 3, 0, STAT.sorte, SKILL_TIPO.buff), 3), STATUS.regeneracao, 3, 2);
+            s.def_por_sorte = true;
+            return s;
+
+        // ===== LUNÁTICO =====
+        case SKILL_ID.luna_basico:
+            return new Skill("Cabeçada", 2, 2, STAT.forca, SKILL_TIPO.dano);
+        case SKILL_ID.luna_palacio:
+            s = skill_efeito(skill_cd(new Skill("Palácio Mental", 3, 0, STAT.vitalidade, SKILL_TIPO.buff), 4), STATUS.regeneracao, 3, 2);
+            s.so_si = true;
+            return s;
+        case SKILL_ID.luna_empalar:
+            return skill_cd(new Skill("Empalar", 5, 7, STAT.forca, SKILL_TIPO.dano), 3);
+        case SKILL_ID.luna_arroto:
+            return skill_efeito(skill_cd(new Skill("Arroto", 3, 2, STAT.carisma, SKILL_TIPO.dano), 3), STATUS.corrosao, 3, 1);
+        case SKILL_ID.luna_respiracao:
+            s = skill_cd(new Skill("Respiração Profunda", 4, 0, STAT.imaginacao, SKILL_TIPO.cura), 4);
+            s.so_si = true;
+            s.cura_total = true;
+            s.auto_efeitos = [ { ef: STATUS.lentidao, dur: 2, val: 2 }, { ef: STATUS.atordoamento, dur: 1, val: 0 } ];
+            return s;
+    }
+    return new Skill("???", 1, 1, STAT.forca, SKILL_TIPO.dano);
+}
+
+// ids de skills já compradas na árvore (qualquer facção), sem repetir
+
+
+// dá até _n skills desbloqueadas ao inimigo (máx. 4 no total, sem instakill)
+function inimigo_sortear_skills(_e, _n) {
+    var pool = skills_desbloqueadas();
+    for (var k = 0; k < _n && array_length(pool) > 0; k++) {
+        var idx = irandom(array_length(pool) - 1);
+        var s = skill_nova(pool[idx]);
+        array_delete(pool, idx, 1);
+        if (s.instakill > 0) continue;
+        if (array_length(_e.skills) < 4) array_push(_e.skills, s);
+    }
 }
 
 function inimigo_novo(_id, _origem) {
@@ -167,6 +290,7 @@ function inimigo_novo(_id, _origem) {
             cl = CLASSE.mutante;
             break;
     }
+    inimigo_sortear_skills(e, 1);
     visual_aleatorio(e, cl, _origem);
     p_curar_total(e);
     return e;
@@ -340,37 +464,48 @@ function criar_deck_jogo() {
 
 // ================= ÁRVORE DE UPGRADES =================
 // Construtor: Upgrade(_nome, _desc, _custo, _efeito, _alvo, _valor, _pai, _col, _lin)
+// _pai = índice do upgrade pai na lista abaixo (cuidado ao reordenar!)
 function criar_upgrades() {
     var lista = [
-        // --- RAMO DE SOBREVIVÊNCIA E TEMPO (Coluna 0) ---
-        new Upgrade("Reservas de Água I", "+6 tempo inicial", 3, UPG_EFEITO.tempo, 0, 6, -1, 0, 0),
-        new Upgrade("Reservas de Água II", "+6 tempo inicial", 5, UPG_EFEITO.tempo, 0, 6, 0, 0, 1),
-        new Upgrade("Kit de Acampamento", "Restaura todo o relógio 1x na run", 8, UPG_EFEITO.acampamento, 0, 1, 1, 0, 2),
+        // --- TEMPO / SOBREVIVÊNCIA (coluna 0) ---
+        new Upgrade("Reservas de Água I", "+6 tempo inicial", 3, UPG_EFEITO.tempo, 0, 6, -1, 0, 0),                    // 0
+        new Upgrade("Reservas de Água II", "+6 tempo inicial", 5, UPG_EFEITO.tempo, 0, 6, 0, 0, 1),                    // 1
+        new Upgrade("Kit de Acampamento", "Restaura todo o relógio 1x na run", 8, UPG_EFEITO.acampamento, 0, 1, 1, 0, 2), // 2
 
-        // --- RAMO DE PLANEJAMENTO E EFICIÊNCIA (Coluna 1) ---
-        new Upgrade("Planos Estratégicos I", "Eventos -1 min", 4, UPG_EFEITO.custo_evento, 0, 1, -1, 1, 0),
-        new Upgrade("Planos Estratégicos II", "Eventos mais -1 min", 6, UPG_EFEITO.custo_evento, 0, 1, 3, 1, 1),
-        new Upgrade("Atalho", "Contornar -1 min", 3, UPG_EFEITO.contornar, 0, 1, 3, 2, 1),
-        new Upgrade("Rota Segura", "Retorno -2 min", 4, UPG_EFEITO.retorno, 0, 2, 4, 1, 2),
+        // --- PLANEJAMENTO E EFICIÊNCIA (colunas 1 e 2) ---
+        new Upgrade("Planos Estratégicos I", "Eventos -1 min", 4, UPG_EFEITO.custo_evento, 0, 1, -1, 1, 0),            // 3
+        new Upgrade("Planos Estratégicos II", "Eventos mais -1 min", 6, UPG_EFEITO.custo_evento, 0, 1, 3, 1, 1),       // 4
+        new Upgrade("Atalho", "Contornar -1 min", 3, UPG_EFEITO.contornar, 0, 1, 3, 2, 1),                             // 5
+        new Upgrade("Rota Segura", "Retorno -2 min", 4, UPG_EFEITO.retorno, 0, 2, 4, 1, 2),                            // 6
 
-        // --- RAMO DE RECRUTAMENTO / PARCEIROS (Coluna 3) ---
-        new Upgrade("Parceiro I", "Começa com 1 aliado na equipe", 5, UPG_EFEITO.membro_inicial, 0, 1, -1, 3, 0),
-        new Upgrade("Parceiro II", "Começa com +1 aliado (total 2)", 7, UPG_EFEITO.membro_inicial, 0, 1, 7, 3, 1),
+        // --- PARCEIROS (coluna 3) ---
+        new Upgrade("Parceiro I", "Começa com 1 aliado na equipe", 5, UPG_EFEITO.membro_inicial, 0, 1, -1, 3, 0),     // 7
+        new Upgrade("Parceiro II", "Começa com +1 aliado (total 2)", 7, UPG_EFEITO.membro_inicial, 0, 1, 7, 3, 1),    // 8
 
-        // --- RAMO DE ATRIBUTOS (Coluna 4) ---
-        new Upgrade("Treino de Força I", "+1 FOR", 3, UPG_EFEITO.stat, STAT.forca, 1, -1, 4, 0),
-        new Upgrade("Treino de Força II", "+1 FOR", 5, UPG_EFEITO.stat, STAT.forca, 1, 9, 4, 1),
-        new Upgrade("Constituição I", "+1 VIT (mais vida)", 3, UPG_EFEITO.stat, STAT.vitalidade, 1, -1, 4, 2),
-        new Upgrade("Constituição II", "+1 VIT", 5, UPG_EFEITO.stat, STAT.vitalidade, 1, 11, 4, 3),
-        new Upgrade("Sorte de Principiante", "+1 SOR", 3, UPG_EFEITO.stat, STAT.sorte, 1, -1, 4, 4),
+        // --- FORÇA e VITALIDADE (coluna 4) ---
+        new Upgrade("Treino de Força I", "+1 FOR", 3, UPG_EFEITO.stat, STAT.forca, 1, -1, 4, 0),                       // 9
+        new Upgrade("Treino de Força II", "+1 FOR", 5, UPG_EFEITO.stat, STAT.forca, 1, 9, 4, 1),                       // 10
+        new Upgrade("Mestre da Força", "+2 FOR", 9, UPG_EFEITO.stat, STAT.forca, 2, 10, 4, 2),                         // 11
+        new Upgrade("Constituição I", "+1 VIT (+3 de vida)", 3, UPG_EFEITO.stat, STAT.vitalidade, 1, -1, 4, 3),        // 12
+        new Upgrade("Constituição II", "+1 VIT (+3 de vida)", 5, UPG_EFEITO.stat, STAT.vitalidade, 1, 12, 4, 4),       // 13
+        new Upgrade("Corpo de Aço", "+2 VIT (+6 de vida)", 9, UPG_EFEITO.stat, STAT.vitalidade, 2, 13, 4, 5),          // 14
 
-        // --- RAMO DE TÁTICAS E SKILLS (Coluna 2) ---
-        new Upgrade("Postura Defensiva", "Skill inicial: Defender", 4, UPG_EFEITO.skill, SKILL_ID.defender, 0, -1, 2, 2),
-        new Upgrade("Kit de Remendo", "Skill inicial: Remendo", 5, UPG_EFEITO.skill, SKILL_ID.remendo, 0, 14, 2, 3),
-        new Upgrade("Cura Coletiva", "Skill inicial: Cura em Área", 6, UPG_EFEITO.skill, SKILL_ID.cura_area, 0, 15, 2, 4)
+        // --- TÉCNICA e IMAGINAÇÃO (coluna 2) ---
+        new Upgrade("Mãos Firmes", "+1 TEC", 4, UPG_EFEITO.stat, STAT.tecnica, 1, -1, 2, 2),                           // 15
+        new Upgrade("Precisão Cirúrgica", "+2 TEC", 7, UPG_EFEITO.stat, STAT.tecnica, 2, 15, 2, 3),                    // 16
+        new Upgrade("Mente Criativa", "+1 IMA", 4, UPG_EFEITO.stat, STAT.imaginacao, 1, -1, 2, 4),                     // 17
+        new Upgrade("Gênio Inventivo", "+2 IMA", 7, UPG_EFEITO.stat, STAT.imaginacao, 2, 17, 2, 5),                    // 18
+
+        // --- SORTE (coluna 3) ---
+        new Upgrade("Sorte de Principiante", "+1 SOR", 3, UPG_EFEITO.stat, STAT.sorte, 1, -1, 3, 4),                   // 19
+        new Upgrade("Trevo da Sorte", "+2 SOR", 7, UPG_EFEITO.stat, STAT.sorte, 2, 19, 3, 5),                          // 20
+
+        // --- CARISMA (coluna 1) ---
+        new Upgrade("Lábia", "+1 CAR", 3, UPG_EFEITO.stat, STAT.carisma, 1, -1, 1, 3),                                 // 21
+        new Upgrade("Voz de Líder", "+2 CAR", 7, UPG_EFEITO.stat, STAT.carisma, 2, 21, 1, 4)                           // 22
     ];
 
-    var u = new Upgrade("Ascensão Final", "Conclui o objetivo principal", 12, UPG_EFEITO.unico, 0, 0, -1, 3, 3);
+    var u = new Upgrade("Ascensão Final", "Conclui o objetivo principal", 12, UPG_EFEITO.unico, 0, 0, -1, 3, 3);       // 23
     u.faccao = FACTION.faction_1;
     array_push(lista, u);
 
@@ -460,10 +595,12 @@ function acao_iniciar_run(_fac) {
             case UPG_EFEITO.basico:         acao_dar_skill(player, u.alvo); break;
         }
     }
-
+	hab_aplicar_equipadas(player, _fac);
     // Adiciona aliados iniciais comprados na árvore de upgrades
     for (var k = 0; k < min(aliados_iniciais, 2); k++) {
-        array_push(aliados, aliado_novo("Aliado " + string(k + 1), origem_da_faccao(_fac)));
+        var novo_aliado = aliado_novo("Aliado " + string(k + 1), origem_da_faccao(_fac));
+        aliado_sortear_skills(novo_aliado, 2);
+        array_push(aliados, novo_aliado);
     }
 
     run_missao = missao_sel;
@@ -834,11 +971,14 @@ function step_preparacao() {
                 prep_tela = PREP_TELA.upgrades;
                 cutscene_tocar(CUT.tut_upgrades);
             } else if (util_in(box_hub(1))) {
-                prep_tela = PREP_TELA.dialogo;
+                prep_tela = PREP_TELA.habilidades;
+                hab_msg = "";
             } else if (util_in(box_hub(2))) {
+                prep_tela = PREP_TELA.dialogo;
+            } else if (util_in(box_hub(3))) {
                 prep_tela = PREP_TELA.missoes;
                 cutscene_tocar(CUT.tut_missoes);
-            } else if (util_in(box_hub(3))) {
+            } else if (util_in(box_hub(4))) {
                 cutscene_tocar(CUT.tut_expedicao);
                 acao_iniciar_run(faccao_atual);
             }
@@ -854,6 +994,26 @@ function step_preparacao() {
                 if (util_in(box_upg(i))) {
                     acao_comprar_upgrade(vis[i]);
                     return;
+                }
+            }
+            break;
+
+        case PREP_TELA.habilidades:
+            if (util_in(box_voltar())) {
+                prep_tela = PREP_TELA.menu;
+                return;
+            }
+            if (util_in(box_hab_remover())) {          // <-- NOVA
+                acao_hab_remover_todas();
+                return;
+            }
+			
+            for (c = 0; c < HAB_COLUNAS; c++) {
+                for (r = 0; r < HAB_LINHAS; r++) {
+                    if (util_in(box_hab(c, r))) {
+                        acao_hab_clicar(c * HAB_LINHAS + r);
+                        return;
+                    }
                 }
             }
             break;
@@ -918,9 +1078,10 @@ function hover_preparacao() {
     switch (prep_tela) {
         case PREP_TELA.menu:
             if (util_in(box_hub(0))) hover = HV.hub;
-            else if (util_in(box_hub(1))) hover = HV.hub + 1;
-            else if (util_in(box_hub(2))) hover = HV.hub + 2;
-            else if (util_in(box_hub(3))) hover = HV.iniciar;
+            else if (util_in(box_hub(1))) hover = HV.habmenu;
+            else if (util_in(box_hub(2))) hover = HV.hub + 1;
+            else if (util_in(box_hub(3))) hover = HV.hub + 2;
+            else if (util_in(box_hub(4))) hover = HV.iniciar;
             break;
 
         case PREP_TELA.upgrades:
@@ -931,10 +1092,20 @@ function hover_preparacao() {
             if (util_in(box_voltar())) hover = HV.voltar;
             break;
 
+        case PREP_TELA.habilidades:
+            for (var c = 0; c < HAB_COLUNAS; c++) {
+                for (var r = 0; r < HAB_LINHAS; r++) {
+                    if (util_in(box_hab(c, r))) hover = HV.hab + c * HAB_LINHAS + r;
+                }
+            }
+            if (util_in(box_voltar())) hover = HV.voltar;
+			if (util_in(box_hab_remover())) hover = HV.habclear;
+            break;
+
         case PREP_TELA.missoes:
-            for (var c = 0; c < TOTAL_FACCOES; c++) {
-                for (var r = 0; r < 5; r++) {
-                    if (util_in(box_missao(c, r))) hover = HV.missao + c * 5 + r;
+            for (var c2 = 0; c2 < TOTAL_FACCOES; c2++) {
+                for (var r2 = 0; r2 < 5; r2++) {
+                    if (util_in(box_missao(c2, r2))) hover = HV.missao + c2 * 5 + r2;
                 }
             }
             if (util_in(box_voltar())) hover = HV.voltar;

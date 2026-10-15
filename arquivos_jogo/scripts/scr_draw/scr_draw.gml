@@ -631,9 +631,10 @@ function draw_painel_lider() {
 
 function draw_prep_menu() {
     draw_botao(box_hub(0), "Melhorias", c_dkgray, c_white, HV.hub, true);
-    draw_botao(box_hub(1), "Conversar com o líder", c_dkgray, c_white, HV.hub + 1, true);
-    draw_botao(box_hub(2), "Missões", c_dkgray, c_white, HV.hub + 2, true);
-    draw_botao(box_hub(3), "Iniciar Expedição", c_lime, c_black, HV.iniciar, true);
+    draw_botao(box_hub(1), "Habilidades", c_dkgray, c_white, HV.habmenu, true);
+    draw_botao(box_hub(2), "Conversar com o líder", c_dkgray, c_white, HV.hub + 1, true);
+    draw_botao(box_hub(3), "Missões", c_dkgray, c_white, HV.hub + 2, true);
+    draw_botao(box_hub(4), "Iniciar Expedição", c_lime, c_black, HV.iniciar, true);
 
     draw_set_color(c_yellow);
     if (missao_sel != undefined) {
@@ -774,6 +775,109 @@ function draw_prep_missoes() {
     draw_botao(box_voltar(), "Voltar", c_dkgray, c_white, HV.voltar, true);
 }
 
+function draw_prep_habilidades() {
+    var f = faccao_atual;
+
+    // cabeçalho de cada coluna
+    draw_set_halign(fa_center);
+    draw_set_color(c_yellow);
+    for (var c = 0; c < HAB_COLUNAS; c++) {
+        draw_text(30 + c * 245 + 117, 78, hab_nome_classe(c));
+    }
+    draw_set_halign(fa_left);
+
+    // linhas conectoras dentro de cada coluna
+    for (var c2 = 0; c2 < HAB_COLUNAS; c2++) {
+        for (var l2 = 1; l2 < HAB_LINHAS; l2++) {
+            var i2 = c2 * HAB_LINHAS + l2;
+            var b_ant = box_hab(c2, l2 - 1);
+            var b_atu = box_hab(c2, l2);
+            var cx = (b_atu[0] + b_atu[2]) / 2;
+            draw_set_color(hab_desbloq[f][i2 - 1] ? c_yellow : c_dkgray);
+            draw_line_width(cx, b_ant[3], cx, b_atu[1], 3);
+        }
+    }
+
+    // nós
+    for (var c3 = 0; c3 < HAB_COLUNAS; c3++) {
+        for (var l3 = 0; l3 < HAB_LINHAS; l3++) {
+            var i = c3 * HAB_LINHAS + l3;
+            var b = box_hab(c3, l3);
+            var s = hab_catalogo[i];
+            var sid = SKILL_ID.mine_basico + i;
+            var comprado = hab_desbloq[f][i];
+            var equip = (hab_pos_slot(sid) != -1);
+            var pode = hab_pode_comprar(i);
+
+            var cor_fundo = c_dkgray;
+            if (equip) cor_fundo = c_green;
+            else if (comprado) cor_fundo = c_teal;
+            else if (pode) cor_fundo = c_navy;
+
+            draw_botao(b, "", cor_fundo, c_white, HV.hab + i, pode || comprado);
+            draw_icone_skill(s, b[0] + 8, b[1] + 7, ICONE_SKILL);
+
+            draw_set_color((comprado || pode) ? c_white : c_gray);
+            draw_text_ext(b[0] + 62, b[1] + 6, s.nome, 14, 168);
+
+            var info = "";
+            var cor_info = c_orange;
+            if (equip) { info = "EQUIPADA"; cor_info = c_lime; }
+            else if (comprado) { info = "Desbloqueada"; cor_info = c_yellow; }
+            else if (l3 > 0 && !hab_desbloq[f][i - 1]) { info = "Requer anterior"; }
+            else { info = "Custo: " + string(hab_custo(l3)); cor_info = pode ? c_aqua : c_orange; }
+            draw_set_color(cor_info);
+            draw_text(b[0] + 62, b[1] + 44, info);
+        }
+    }
+
+    // barra das habilidades equipadas (slot 1 = ataque básico obrigatório)
+    draw_set_color(c_white);
+    draw_text(30, 470, "EQUIPADAS (o 1º é o ataque básico, obrigatório; clique para equipar ou tirar):");
+    for (var k = 0; k < HAB_SLOTS; k++) {
+        var x1 = 30 + k * 260;
+        var y1 = 495;
+        draw_set_color(c_black);
+        draw_rectangle(x1, y1, x1 + 250, y1 + 56, false);
+        draw_set_color(k == 0 ? c_yellow : c_white);
+        draw_rectangle(x1, y1, x1 + 250, y1 + 56, true);
+
+        var ide = hab_slots[f][k];
+        if (ide == -1) {
+            draw_set_color(c_gray);
+            draw_text(x1 + 10, y1 + 18, "vazio");
+        } else {
+            var se = hab_skill_por_id(ide);
+            draw_icone_skill(se, x1 + 4, y1 + 4, ICONE_SKILL);
+            draw_set_color(c_white);
+            draw_text_ext(x1 + 58, y1 + 6, se.nome, 14, 188);
+            if (k == 0) {
+                draw_set_color(c_yellow);
+                draw_text(x1 + 58, y1 + 38, "Básico");
+            }
+        }
+    }
+
+    // mensagem de aviso
+    if (hab_msg != "") {
+        draw_set_color(c_orange);
+        draw_text(30, 562, hab_msg);
+    }
+
+    // detalhe da habilidade sob o mouse
+    if (hover >= HV.hab && hover < HV.hab + HAB_TOTAL) {
+        var sh = hab_catalogo[hover - HV.hab];
+        draw_set_color(c_white);
+        var cd_txt = (sh.cd_max > 0) ? ("  |  Recarga: " + string(sh.cd_max)) : "";
+        draw_text(30, 590, sh.nome + "  |  " + nome_categoria_skill(sh.cat) + "  |  Consumo: +" + string(sh.tempo) + " min" + cd_txt);
+        draw_set_color(c_ltgray);
+        draw_text_ext(30, 612, skill_resumo(sh, 0), 20, 1200);
+    }
+
+    draw_botao(box_voltar(), "Voltar", c_dkgray, c_white, HV.voltar, true);
+    draw_botao(box_hab_remover(), "Remover todas", c_maroon, c_white, HV.habclear, true);
+}
+
 function draw_preparacao() {
     draw_set_halign(fa_center);
     draw_set_color(c_white);
@@ -787,6 +891,7 @@ function draw_preparacao() {
         case PREP_TELA.upgrades: draw_prep_upgrades(); break;
         case PREP_TELA.dialogo:  draw_prep_dialogo(); break;
         case PREP_TELA.missoes:  draw_prep_missoes(); break;
+		case PREP_TELA.habilidades: draw_prep_habilidades(); break;
     }
     draw_set_color(c_white);
 }

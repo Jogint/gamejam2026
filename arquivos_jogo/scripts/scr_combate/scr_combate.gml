@@ -85,6 +85,47 @@ function centro_slot(_p) {
     return [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
 }
 
+// ================= AUXILIARES DE EFEITOS =================
+// sorteia uma chance de 0 a 1
+function combate_rola(_chance) {
+    return (random(1) < _chance);
+}
+
+// chance baseada em SORTE: cada ponto vale 10%, teto de 90%
+function combate_chance_sorte(_p) {
+    return clamp(stat_total(_p, STAT.sorte) * 0.1, 0, 0.9);
+}
+
+// skills que dispensam o clique no alvo
+function skill_auto_alvo(_s) {
+    return (_s.so_si || _s.alcance == ALCANCE.global);
+}
+
+// escolhe um alvo válido automaticamente (undefined se não houver)
+function combate_alvo_auto(_ator, _s) {
+    if (_s.so_si) return _ator;
+    var lado = lista_lado(_ator, skill_hostil(_s));
+    for (var i = 0; i < array_length(lado); i++) {
+        if (lado[i].hp <= 0) continue;
+        if (_s.exclui_si && lado[i] == _ator) continue;
+        return lado[i];
+    }
+    return undefined;
+}
+
+// cura o usuário e os aliados ao lado dele
+function combate_cura_adjacentes(_at, _v) {
+    var lado = lista_lado(_at, false);
+    var ia = combate_indice(lado, _at);
+    for (var i = 0; i < array_length(lado); i++) {
+        var p = lado[i];
+        if (p.hp <= 0 || abs(i - ia) > 1) continue;
+        p.hp = min(p_hp_max(p), p.hp + _v);
+        var c = centro_slot(p);
+        criar_popup("+" + string(_v), c[0], c[1], c_lime);
+    }
+}
+
 // ================= INÍCIO / RODADAS =================
 function combate_resetar_grupo() {
     var g = get_grupo();
@@ -175,10 +216,18 @@ function combate_planejar_inimigos() {
         if (array_length(disp) == 0) continue;
         var s = disp[irandom(array_length(disp) - 1)];
 
+        // skill só em si: o alvo é o próprio inimigo
+        if (s.so_si) {
+            combate_enfileirar(e, s, e, true, i);
+            continue;
+        }
+
         var lado = lista_lado(e, skill_hostil(s));
         var vivos = [];
         for (var j = 0; j < array_length(lado); j++) {
-            if (lado[j].hp > 0) array_push(vivos, lado[j]);
+            if (lado[j].hp <= 0) continue;
+            if (s.exclui_si && lado[j] == e) continue;
+            array_push(vivos, lado[j]);
         }
         if (array_length(vivos) == 0) continue;
 
@@ -200,12 +249,18 @@ function combate_alvos(_a) {
     var lista = lista_lado(_a.ator, skill_hostil(sk));
     var res = [];
 
+    if (sk.so_si) {
+        if (_a.ator.hp > 0) array_push(res, _a.ator);
+        return res;
+    }
+
     if (sk.alcance != ALCANCE.global && _a.alvo.hp <= 0) return res;
 
     var ia = combate_indice(lista, _a.alvo);
     for (var i = 0; i < array_length(lista); i++) {
         var p = lista[i];
         if (p.hp <= 0) continue;
+        if (sk.exclui_si && p == _a.ator) continue;
         switch (sk.alcance) {
             case ALCANCE.unico:
                 if (p == _a.alvo) array_push(res, p);
@@ -256,34 +311,68 @@ function combate_exec_acao(_a) {
     }
 
     var txt_log = "";
+    var aplicou = false;   // algum status entrou de fato (para o log)
+
     for (var i = 0; i < array_length(alvos); i++) {
         var al = alvos[i];
         var c = centro_slot(al);
         var v = sk.base + stat_total(at, sk.stat);
         var txt = "";
+        var morte = false;
 
         if (sk.alcance == ALCANCE.adjacente && al != _a.alvo) v = max(1, floor(v / 2));
+        var v_cru = v;   // valor antes de defesa (usado por espelho e cura_adj)
 
         switch (sk.tipo) {
             case SKILL_TIPO.dano:
                 al.pose = POSE.dano;
 
-                if (al.defendendo) {
+                // morte instantânea
+                if (sk.instakill > 0) {
+                    var ch_k = min(sk.instakill + stat_total(at, sk.stat) * 0.02, 0.5);
+                    if (combate_rola(ch_k)) {
+                        v = al.hp;
+                        morte = true;
+                    }
+                }
+
+                if (al.defendendo && !morte) {
                     v = round(v * (1 - DEFENDER_REDUCAO));
                     txt = "-" + string(v) + " (Defendido!)";
                     combate_log(al.nome + " bloqueou o ataque!");
                 } else {
-                    txt = "-" + string(v);
+                    txt = morte ? "MORTE INSTANTÂNEA!" : "-" + string(v);
                 }
-                
+
                 al.hp = max(0, al.hp - v);
                 al.flash = 12;
-                criar_popup(txt, c[0], c[1], al.defendendo ? c_aqua : c_red);
+                criar_popup(txt, c[0], c[1], (al.defendendo && !morte) ? c_aqua : c_red);
                 if (al.hp <= 0) combate_log(al.nome + " foi derrotado!");
+
+                // Superaquecido: todo dano causado queima o alvo
+                if (status_tem(at, STATUS.superaquecido) && al.hp > 0) {
+                    status_aplicar(al, STATUS.queimadura, 3, 1);
+                    criar_popup(status_nome(STATUS.queimadura), c[0], c[1] - 24, status_cor(STATUS.queimadura));
+                }
+
+                // espelho: o usuário sofre o mesmo dano (ignora Defender)
+                if (sk.espelho && i == 0) {
+                    var ca = centro_slot(at);
+                    at.hp = max(0, at.hp - v_cru);
+                    at.flash = 12;
+                    at.pose = POSE.dano;
+                    criar_popup("-" + string(v_cru), ca[0], ca[1], c_purple);
+                    combate_log(at.nome + " sofre " + string(v_cru) + " de dano próprio.");
+                    if (at.hp <= 0) combate_log(at.nome + " foi derrotado!");
+                }
+
+                // cura o usuário e aliados adjacentes (ex: Raio de Luz)
+                if (sk.cura_adj && i == 0) combate_cura_adjacentes(at, v_cru);
                 break;
 
             case SKILL_TIPO.cura:
             case SKILL_TIPO.restaurar:
+                if (sk.cura_total) v = p_hp_max(al) - al.hp;
                 al.hp = min(p_hp_max(al), al.hp + v);
                 txt = "+" + string(v);
                 criar_popup("+" + string(v), c[0], c[1], c_lime);
@@ -306,9 +395,28 @@ function combate_exec_acao(_a) {
                 break;
         }
 
-        if (sk.efeito != -1 && al.hp > 0) {
+        // efeito principal (com chance)
+        if (sk.efeito != -1 && al.hp > 0 && combate_rola(sk.chance)) {
             status_aplicar(al, sk.efeito, sk.ef_dur, sk.ef_val);
             criar_popup(status_nome(sk.efeito), c[0], c[1] - 24, status_cor(sk.efeito));
+            aplicou = true;
+        }
+
+        // segundo efeito (com chance própria)
+        if (sk.efeito2 != -1 && al.hp > 0 && combate_rola(sk.ef2_chance)) {
+            status_aplicar(al, sk.efeito2, sk.ef2_dur, 1);
+            criar_popup(status_nome(sk.efeito2), c[0], c[1] - 44, status_cor(sk.efeito2));
+        }
+
+        // chance de dar Defender (no alvo ou em si)
+        var ch_def = sk.def_por_sorte ? combate_chance_sorte(at) : sk.def_chance;
+        if (ch_def > 0 && combate_rola(ch_def)) {
+            var dest = sk.def_em_si ? at : al;
+            if (dest.hp > 0) {
+                var cd_ = centro_slot(dest);
+                dest.defendendo = true;
+                criar_popup("Defendendo!", cd_[0], cd_[1] - 64, c_aqua);
+            }
         }
 
         if (sk.particula != noone) criar_particula(sk.particula, c[0], c[1]);
@@ -316,11 +424,21 @@ function combate_exec_acao(_a) {
         if (i == 0) txt_log = txt;
     }
 
+    // status que a skill aplica no próprio usuário (ex: Respiração Profunda)
+    if (at.hp > 0) {
+        var cs = centro_slot(at);
+        for (var m = 0; m < array_length(sk.auto_efeitos); m++) {
+            var ae = sk.auto_efeitos[m];
+            status_aplicar(at, ae.ef, ae.dur, ae.val);
+            criar_popup(status_nome(ae.ef), cs[0], cs[1] - 24 - m * 20, status_cor(ae.ef));
+        }
+    }
+
     sk.cd = (sk.cd_max > 0) ? sk.cd_max + 1 : 0;
 
     var nome_alvo = (array_length(alvos) > 1) ? "todos" : alvos[0].nome;
     var detalhe = txt_log;
-    if (sk.efeito != -1) detalhe += ((detalhe == "") ? "" : " ") + status_nome(sk.efeito);
+    if (sk.efeito != -1 && aplicou) detalhe += ((detalhe == "") ? "" : " ") + status_nome(sk.efeito);
     combate_log(at.nome + " > " + sk.nome + " > " + nome_alvo + " (" + detalhe + ")");
 }
 
@@ -338,6 +456,16 @@ function combate_tick_status() {
             if (s.ef == STATUS.corrosao) {
                 dano = s.acc;
                 s.acc += s.val;
+            }
+
+            // regeneração: cura s.val por turno
+            if (s.ef == STATUS.regeneracao) {
+                var cura = min(s.val, p_hp_max(p) - p.hp);
+                if (cura > 0) {
+                    p.hp += cura;
+                    criar_popup("+" + string(cura), c[0], c[1], c_lime);
+                    combate_log(p.nome + " regenera " + string(cura) + ".");
+                }
             }
 
             if (dano > 0) {
@@ -414,10 +542,24 @@ function step_combate(_clicou, _clicou_dir) {
 function combate_step_skill(_clicou) {
     if (!_clicou) return;
     var g = get_grupo();
-    var sk = g[c_ator].skills;
+    var ator = g[c_ator];
+    var sk = ator.skills;
     for (var k = 0; k < array_length(sk); k++) {
         if (util_in(box_skill(k))) {
             if (!skill_usavel(sk[k])) return;
+
+            // skills globais ou só em si entram direto na fila
+            if (skill_auto_alvo(sk[k])) {
+                var al = combate_alvo_auto(ator, sk[k]);
+                if (al == undefined) {
+                    combate_log("Sem alvos válidos para " + sk[k].nome + ".");
+                    return;
+                }
+                combate_enfileirar(ator, sk[k], al, false, c_ator);
+                combate_proximo_ator();
+                return;
+            }
+
             c_skill = k;
             c_fase = COMBAT_FASE.alvo;
             return;
@@ -436,9 +578,18 @@ function combate_step_alvo(_clicou, _clicou_dir) {
     var g = get_grupo();
     var ator = g[c_ator];
 
+    // clicou em outra skill: troca (ou já enfileira, se for automática)
     for (var k = 0; k < array_length(ator.skills); k++) {
         if (util_in(box_skill(k))) {
-            if (skill_usavel(ator.skills[k])) c_skill = k;
+            if (skill_usavel(ator.skills[k])) {
+                if (skill_auto_alvo(ator.skills[k])) {
+                    c_skill = -1;
+                    c_fase = COMBAT_FASE.skill;
+                    combate_step_skill(true);
+                } else {
+                    c_skill = k;
+                }
+            }
             return;
         }
     }

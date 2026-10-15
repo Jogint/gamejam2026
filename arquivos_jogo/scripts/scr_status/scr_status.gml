@@ -45,40 +45,46 @@ function cor_categoria_skill(_c) {
 // ---- status ----
 function status_nome(_e) {
     switch (_e) {
-        case STATUS.queimadura:  return "Queimadura";
+        case STATUS.queimadura:   return "Queimadura";
         case STATUS.atordoamento: return "Atordoamento";
-        case STATUS.corrosao:    return "Corrosão";
-        case STATUS.lentidao:    return "Lentidão";
-        case STATUS.celeridade:  return "Celeridade";
+        case STATUS.corrosao:     return "Corrosão";
+        case STATUS.lentidao:     return "Lentidão";
+        case STATUS.celeridade:   return "Celeridade";
+        case STATUS.regeneracao:  return "Regeneração";
+        case STATUS.superaquecido: return "Superaquecido";
     }
     return "";
 }
 
 function status_sigla(_e) {
     switch (_e) {
-        case STATUS.queimadura:  return "QUE";
+        case STATUS.queimadura:   return "QUE";
         case STATUS.atordoamento: return "ATO";
-        case STATUS.corrosao:    return "COR";
-        case STATUS.lentidao:    return "LEN";
-        case STATUS.celeridade:  return "CEL";
+        case STATUS.corrosao:     return "COR";
+        case STATUS.lentidao:     return "LEN";
+        case STATUS.celeridade:   return "CEL";
+        case STATUS.regeneracao:  return "REG";
+        case STATUS.superaquecido: return "SUP";
     }
     return "";
 }
 
 function status_cor(_e) {
     switch (_e) {
-        case STATUS.queimadura:  return c_orange;
+        case STATUS.queimadura:   return c_orange;
         case STATUS.atordoamento: return c_yellow;
-        case STATUS.corrosao:    return c_green;
-        case STATUS.lentidao:    return c_aqua;
-        case STATUS.celeridade:  return c_fuchsia;
+        case STATUS.corrosao:     return c_green;
+        case STATUS.lentidao:     return c_aqua;
+        case STATUS.celeridade:   return c_fuchsia;
+        case STATUS.regeneracao:  return c_lime;
+        case STATUS.superaquecido: return c_red;
     }
     return c_white;
 }
 
-// só a celeridade é boa; a restauração remove todos os outros
+// celeridade, regeneração e superaquecido são bons; a restauração remove todos os outros
 function status_negativo(_e) {
-    return (_e != STATUS.celeridade);
+    return (_e != STATUS.celeridade && _e != STATUS.regeneracao && _e != STATUS.superaquecido);
 }
 
 function status_tem(_p, _ef) {

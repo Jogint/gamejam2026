@@ -1,5 +1,3 @@
-////scr_game_defs
-
 // ================= CONSTANTES =================
 #macro TOTAL_FACCOES 4      // 3 jogáveis + 1 neutra (lilás)
 #macro MAX_GRUPO 4          // player + até 3 aliados
@@ -9,6 +7,11 @@
 #macro TEMPO_CONTA_INIMIGO true   // false = só as ações do jogador contam no tempo da rodada
 #macro ICONE_SKILL 48       // tamanho (px) do ícone quadrado das habilidades
 #macro DEFENDER_REDUCAO 1   // fração do dano bloqueada por "Defender" (1 = 100%, 0.9 = 90%...)
+#macro HAB_COLUNAS 5        // classes
+#macro HAB_LINHAS 5         // skills por classe
+#macro HAB_TOTAL 25
+#macro HAB_SLOTS 3          // vagas de habilidade equipada
+
 
 enum GAME_STATE { expedition, card, combat, run_end, preparacao }
 enum FACTION { faction_1, faction_2, faction_3, count }
@@ -19,10 +22,20 @@ enum STAT { vitalidade, forca, imaginacao, tecnica, sorte, carisma, count }
 enum SKILL_TIPO { dano, cura, restaurar, buff, debuff, recarga, defesa }
 enum SKILL_CAT { basico, skill, missao }
 enum ALCANCE { unico, adjacente, global }
-enum STATUS { queimadura, atordoamento, corrosao, lentidao, celeridade, count }
+enum STATUS { queimadura, atordoamento, corrosao, lentidao, celeridade, regeneracao, superaquecido, count }
 enum SKILL_ID { golpe, pancada, mordida, disparo, tiro, improviso, remendo, investida, sobrecarga, rajada,
                 chama, atordoar, acido, purificar, estilhacos, explosao, rede, estimulante, sincronia,
-                defender, cura_area }
+                defender, cura_area,
+                // mineirador
+                mine_basico, mine_superaquecer, mine_perfurar, mine_pedra, mine_polvora,
+                // ministrel
+                mene_basico, mene_cura, mene_desespero, mene_detox, mene_banshee,
+                // acolyte
+                acol_basico, acol_yang, acol_punho, acol_perdicao, acol_raio,
+                // shielder
+                escu_basico, escu_tartaruga, escu_refletor, escu_passo, escu_grande,
+                // lunatico
+                luna_basico, luna_palacio, luna_empalar, luna_arroto, luna_respiracao }
 enum ENEMY_ID { besta, saqueador, sentinela, rato, guarda, colosso }
 enum CLASSE { sobrevivente, soldado, mutante, maquina, civil, count }
 enum COMBAT_FASE { skill, alvo, resolver, fim }
@@ -30,7 +43,7 @@ enum COMBAT_RES { nenhum, vitoria, derrota, tempo }
 enum FIM_RUN { retorno, trilha, tempo, derrota }
 enum UPG_EFEITO { tempo, retorno, contornar, stat, skill, unico, basico, custo_evento, acampamento, membro_inicial }
 enum MISSAO_TIPO { exploracao, escolta, entrega, combate, unica }
-enum PREP_TELA { menu, upgrades, dialogo, missoes }
+enum PREP_TELA { menu, upgrades, dialogo, missoes, habilidades }
 
 // Mapeamento dos frames dos sprites de corpo e cabeça
 enum POSE { idle = 0, atq_basico = 1, dano = 2, habilidade = 3 }
@@ -44,7 +57,7 @@ enum CUT { intro, morte, final_1, final_2, final_3, final_4,
            tut_combate, tut_escolta, tut_entrega, tut_passagem, count }
 
 // ids usados para animar o hover de cada elemento
-enum HV { opcao = 0, avancar = 4, retorno = 5, acampar = 6, skill = 7, upg = 10, iniciar = 35, alvo = 36, hub = 44, voltar = 47, missao = 48, count = 68 }
+enum HV { opcao = 0, avancar = 4, retorno = 5, acampar = 6, skill = 7, upg = 10, iniciar = 35, alvo = 36, hub = 44, voltar = 47, missao = 48, habmenu = 68, hab = 69, habclear = 94, count = 95 }
 
 function Skill(_nome, _tempo, _base, _stat, _tipo) constructor {
     nome = _nome;
@@ -64,6 +77,22 @@ function Skill(_nome, _tempo, _base, _stat, _tipo) constructor {
 
     icone = noone;
     icone_sub = 0;
+
+    // --- extras das skills de classe ---
+    chance = 1;             // chance (0 a 1) do efeito principal
+    efeito2 = -1;           // segundo efeito possível
+    ef2_dur = 0;
+    ef2_chance = 0;
+    def_chance = 0;         // chance de dar Defender
+    def_por_sorte = false;  // true: chance de Defender = SORTE x 10%
+    def_em_si = false;      // true: o Defender vai para o próprio usuário
+    instakill = 0;          // chance base (0 a 1) de matar na hora
+    espelho = false;        // usuário sofre o mesmo dano que causa
+    cura_total = false;     // cura a vida inteira
+    cura_adj = false;       // cura o usuário e aliados adjacentes
+    so_si = false;          // alvo é sempre o próprio usuário
+    exclui_si = false;      // em skills globais, o usuário fica de fora
+    auto_efeitos = [];      // status aplicados no usuário: [{ ef, dur, val }]
 }
 
 function Personagem(_nome) constructor {
