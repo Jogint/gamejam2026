@@ -13,68 +13,101 @@ function criar_missoes() {
     var f4 = [];
     var m;
 
-    // ---- Facção 1 ----
-    missao_nova(f1, "Reconhecer a Ala Norte", "Você chegou à Ala Norte e mapeou o que restou dela.", MISSAO_TIPO.exploracao, 3);
-    m = missao_nova(f1, "Escoltar o Engenheiro", "Leve o Engenheiro até o nível 7 com vida.", MISSAO_TIPO.escolta, 7);
+    // ================= FACÇÃO 1 =================
+    m = missao_nova(f1, "Reconhecer a Ala Norte", "Você chegou à Ala Norte e mapeou o que restou dela.", MISSAO_TIPO.exploracao, 3);
+    m.area = AREA.ini_1;
+    m.recompensa = 3;
+
+    m = missao_nova(f1, "Escoltar o Engenheiro", "Leve o Engenheiro até o nível 3 das Ruínas Avançadas 1-2 com vida.", MISSAO_TIPO.escolta, 3);
     m.npc_nome = "Engenheiro";
-    m = missao_nova(f1, "Peças para o Depósito", "Deixe a carga no depósito do nível 4 e siga sua run.", MISSAO_TIPO.entrega, 4);
+    m.area = AREA.av_12;
+    m.recompensa = 8;
+
+    m = missao_nova(f1, "Peças para o Depósito", "Deixe as peças no depósito da Fronteira 1-2 (nível 3).", MISSAO_TIPO.entrega, 3);
     m.carga_nome = "Peças de Reposição";
-    m = missao_nova(f1, "Limpar o Túnel Colapsado", "Uma ninhada bloqueia o túnel do nível 8.", MISSAO_TIPO.combate, 8);
-    m.inimigos = [ENEMY_ID.besta, ENEMY_ID.rato, ENEMY_ID.rato];
-    m.recompensa = 4;
+    m.area = AREA.ent_12;
+    m.recompensa = 6;
+
+    m = missao_nova(f1, "Quebrar a Matilha", "Um domador e sua matilha bloqueiam a Fronteira 3-1 (nível 6).", MISSAO_TIPO.combate, 6);
+    m.inimigos = [ENEMY_ID.domador, ENEMY_ID.lobo, ENEMY_ID.lobo];
+    m.area = AREA.ent_31;
+    m.recompensa = 9;
+
     m = missao_nova(f1, "Ascensão da Facção 1", "Adquira o upgrade final único (uma alternativa ao recurso).", MISSAO_TIPO.unica, -1);
     m.recompensa = 0;
 
-    // ---- Facção 2 ----
-    missao_nova(f2, "Mapear o Perímetro", "Você alcançou o perímetro e marcou os pontos de vigia.", MISSAO_TIPO.exploracao, 2);
-    m = missao_nova(f2, "Escoltar o Batedor", "Leve o Batedor até o nível 9 com vida.", MISSAO_TIPO.escolta, 9);
+    // ================= FACÇÃO 2 =================
+    m = missao_nova(f2, "Mapear o Perímetro", "Você alcançou o perímetro e marcou os pontos de vigia.", MISSAO_TIPO.exploracao, 2);
+    m.area = AREA.ini_2;
+    m.recompensa = 3;
+
+    m = missao_nova(f2, "Escoltar o Batedor", "Leve o Batedor até o nível 3 das Ruínas Avançadas 2-3 com vida.", MISSAO_TIPO.escolta, 3);
     m.npc_nome = "Batedor";
-    m = missao_nova(f2, "Rádio para o Posto Avançado", "Deixe o rádio no posto avançado do nível 3.", MISSAO_TIPO.entrega, 3);
+    m.area = AREA.av_23;
+    m.recompensa = 8;
+
+    m = missao_nova(f2, "Rádio para o Posto Avançado", "Deixe o rádio no posto da Fronteira 2-3 (nível 3).", MISSAO_TIPO.entrega, 3);
     m.carga_nome = "Rádio de Campo";
-    m = missao_nova(f2, "Quebrar a Patrulha", "Uma patrulha saqueadora vigia o nível 6.", MISSAO_TIPO.combate, 6);
-    m.inimigos = [ENEMY_ID.saqueador, ENEMY_ID.saqueador];
-    m.recompensa = 4;
+    m.area = AREA.ent_23;
+    m.recompensa = 6;
+
+    m = missao_nova(f2, "Quebrar a Patrulha", "Uma patrulha armada vigia a Fronteira 1-2 (nível 6).", MISSAO_TIPO.combate, 6);
+    m.inimigos = [ENEMY_ID.demonio, ENEMY_ID.espadachim];
+    m.area = AREA.ent_12;
+    m.recompensa = 9;
+
     m = missao_nova(f2, "Dominar os Pontos Fixos", "Domine 3 pontos fixos hostis de outras facções.", MISSAO_TIPO.unica, -1);
     m.meta = 3;
     m.recompensa = 6;
 
-    // ---- Facção 3 ----
-    missao_nova(f3, "Encontro nas Ruínas Neutras", "Você chegou ao ponto de encontro e o local está seguro.", MISSAO_TIPO.exploracao, 4);
-    m = missao_nova(f3, "Escoltar o Mediador", "Leve o Mediador até o nível 8 com vida.", MISSAO_TIPO.escolta, 8);
+    // ================= FACÇÃO 3 =================
+    m = missao_nova(f3, "Encontro nas Ruínas Neutras", "Você chegou ao ponto de encontro e o local está seguro.", MISSAO_TIPO.exploracao, 4);
+    m.area = AREA.ini_3;
+    m.recompensa = 3;
+
+    m = missao_nova(f3, "Escoltar o Mediador", "Leve o Mediador até o nível 3 das Ruínas Avançadas 3-1 com vida.", MISSAO_TIPO.escolta, 3);
     m.npc_nome = "Mediador";
-    m = missao_nova(f3, "Carta de Paz", "Entregue a carta no ponto de troca do nível 6.", MISSAO_TIPO.entrega, 6);
+    m.area = AREA.av_31;
+    m.recompensa = 8;
+
+    m = missao_nova(f3, "Carta de Paz", "Entregue a carta no ponto de troca da Fronteira 3-1 (nível 3).", MISSAO_TIPO.entrega, 3);
     m.carga_nome = "Carta de Paz";
-    m = missao_nova(f3, "Dissolver a Emboscada", "Guardas hostis bloqueiam o caminho do nível 9.", MISSAO_TIPO.combate, 9);
-    m.inimigos = [ENEMY_ID.guarda, ENEMY_ID.guarda];
-    m.recompensa = 4;
+    m.area = AREA.ent_31;
+    m.recompensa = 6;
+
+    m = missao_nova(f3, "Dissolver a Emboscada", "Mascarados e seu totem bloqueiam a Fronteira 2-3 (nível 6).", MISSAO_TIPO.combate, 6);
+    m.inimigos = [ENEMY_ID.totem, ENEMY_ID.mascara, ENEMY_ID.mascara];
+    m.area = AREA.ent_23;
+    m.recompensa = 9;
+
     m = missao_nova(f3, "Paz Entre as Facções", "Leve a relação positiva com todas as outras facções ao máximo.", MISSAO_TIPO.unica, -1);
     m.meta = 3 * RELACAO_MAX;
     m.recompensa = 6;
 
-    // ---- Facção 4 (missões entregues por NPCs) ----
-    missao_nova(f4, "Seguir o Rastro do Mensageiro", "O rastro termina aqui, no nível 4.", MISSAO_TIPO.exploracao, 4);
-    m = missao_nova(f4, "Guiar o Cartógrafo", "Leve o Cartógrafo até o nível 7 com vida.", MISSAO_TIPO.escolta, 7);
+    // ================= FACÇÃO 4 (missões entregues por NPCs) =================
+    m = missao_nova(f4, "Seguir o Rastro do Mensageiro", "O rastro termina nas Ruínas Avançadas 1-2, no nível 4.", MISSAO_TIPO.exploracao, 4);
+    m.area = AREA.av_12;
+    m.recompensa = 6;
+
+    m = missao_nova(f4, "Guiar o Cartógrafo", "Leve o Cartógrafo até o nível 7 das Ruínas Avançadas 2-3 com vida.", MISSAO_TIPO.escolta, 7);
     m.npc_nome = "Cartógrafo";
-    m = missao_nova(f4, "Pacote Lacrado", "Deixe o pacote no ponto indicado, no nível 6.", MISSAO_TIPO.entrega, 6);
+    m.area = AREA.av_23;
+    m.recompensa = 11;
+
+    m = missao_nova(f4, "Pacote Lacrado", "Deixe o pacote no ponto indicado das Ruínas Avançadas 3-1, no nível 6.", MISSAO_TIPO.entrega, 6);
     m.carga_nome = "Pacote Lacrado";
-    m = missao_nova(f4, "Eliminar a Ninhada Alfa", "A ninhada alfa espera no nível 8.", MISSAO_TIPO.combate, 8);
-    m.inimigos = [ENEMY_ID.besta, ENEMY_ID.besta];
-    m.recompensa = 4;
-    // ALTERADO: o chefe agora vem do último nível do Coração do Setor (criar_carta_chefe), sem nível/área aqui
+    m.area = AREA.av_31;
+    m.recompensa = 9;
+
+    m = missao_nova(f4, "Eliminar o Enxame Alfa", "O enxame alfa espera no nível 8 do Coração do Setor.", MISSAO_TIPO.combate, 8);
+    m.inimigos = [ENEMY_ID.mosquito, ENEMY_ID.mosquito, ENEMY_ID.zumbi];
+    m.area = AREA.meio;
+    m.recompensa = 12;
+
+    // o chefe vem do último nível do Coração do Setor (criar_carta_chefe)
     m = missao_nova(f4, "Rastrear o Colosso", "No coração do setor, algo enorme espera você.", MISSAO_TIPO.combate, -1);
     m.inimigos = [ENEMY_ID.colosso];
     m.recompensa = 10;
-
-    // NOVO: em que área cada missão acontece
-    for (var k = 0; k < 5; k++) {
-        f1[k].area = AREA.ini_1;
-        f2[k].area = AREA.ini_2;
-        f3[k].area = AREA.ini_3;
-    }
-    f4[0].area = AREA.av_12;
-    f4[1].area = AREA.av_23;
-    f4[2].area = AREA.av_31;
-    f4[3].area = AREA.meio;
 
     return [f1, f2, f3, f4];
 }
@@ -275,6 +308,9 @@ function missao_checar_finais() {
 function acao_dar_carga(_m) {
     var s = new Skill("Carga: " + _m.carga_nome, 0, 0, STAT.forca, SKILL_TIPO.dano);
     s.cat = SKILL_CAT.missao;
+	    // frames 2/3/4 = entrega da facção azul/vermelha/verde (dona da missão)
+    s.icone = spr_extra_skills;
+    s.icone_sub = 2 + ((run_missao.d < FACTION.count) ? run_missao.d : faccao_atual);
     if (array_length(player.skills) < player.max_skills) {
         array_push(player.skills, s);
     } else {

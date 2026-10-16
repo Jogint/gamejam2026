@@ -36,7 +36,8 @@ enum SKILL_ID { golpe, pancada, mordida, disparo, tiro, improviso, remendo, inve
                 escu_basico, escu_tartaruga, escu_refletor, escu_passo, escu_grande,
                 // lunatico
                 luna_basico, luna_palacio, luna_empalar, luna_arroto, luna_respiracao }
-enum ENEMY_ID { besta, saqueador, sentinela, rato, guarda, colosso }
+enum ENEMY_ID { saqueador, sentinela, guarda, colosso,
+                mosquito, zumbi, espadachim, demonio, mascara, totem, lobo, domador, sombra }
 enum CLASSE {
     escudeiro,   // shielder
     mineirador,  // miner
@@ -61,7 +62,7 @@ enum AREA { ini_1, ini_2, ini_3, ent_12, ent_23, ent_31, av_12, av_23, av_31, me
 // cutscenes e tutoriais
 enum CUT { intro, morte, final_1, final_2, final_3, final_4,
            tut_preparacao, tut_upgrades, tut_missoes, tut_expedicao, tut_evento, tut_diplomacia,
-           tut_combate, tut_escolta, tut_entrega, tut_passagem, count }
+           tut_combate, tut_escolta, tut_entrega, tut_passagem, tut_habilidades, count }
 
 // ids usados para animar o hover de cada elemento
 enum HV { opcao = 0, avancar = 4, retorno = 5, acampar = 6, skill = 7, upg = 10, iniciar = 35, alvo = 36, hub = 44, voltar = 47, missao = 48, habmenu = 68, hab = 69, habclear = 94, count = 95 }
@@ -111,6 +112,7 @@ function Personagem(_nome) constructor {
     hp = 1;
     hp_vis = 1;
     flash = 0;
+	hp_mult = 1;
 
     status = [];
     pula = false;

@@ -13,7 +13,7 @@ function stat_total(_p, _s) {
 }
 
 function p_hp_max(_p) {
-    return 10 + stat_total(_p, STAT.vitalidade) * 3;
+    return round((10 + stat_total(_p, STAT.vitalidade) * 3) * _p.hp_mult);
 }
 
 function p_curar_total(_p) {
@@ -73,6 +73,12 @@ function skill_nova(_id) {
     if (_id >= SKILL_ID.mine_basico) {
         s.icone = spr_cls;
         s.icone_sub = _id - SKILL_ID.mine_basico;
+    } else if (_id == SKILL_ID.tiro) {
+        s.icone = spr_extra_skills;
+        s.icone_sub = 0;
+    } else if (_id == SKILL_ID.golpe) {
+        s.icone = spr_extra_skills;
+        s.icone_sub = 1;
     } else {
         s.icone = spr_ico;
         s.icone_sub = _id;
@@ -122,7 +128,7 @@ function skill_nova_dados(_id) {
             return skill_alcance(skill_cd(new Skill("Sincronia", 3, 1, STAT.imaginacao, SKILL_TIPO.recarga), 4), ALCANCE.global);
 
         case SKILL_ID.defender:
-            return skill_cd(new Skill("Defender", 1, 0, STAT.vitalidade, SKILL_TIPO.defesa), 1);
+            return skill_cd(new Skill("Defender", 0, 0, STAT.vitalidade, SKILL_TIPO.defesa), 1);
         case SKILL_ID.cura_area:
             return skill_alcance(skill_cd(new Skill("Cura em Área", 4, 2, STAT.tecnica, SKILL_TIPO.cura), 4), ALCANCE.global);
     }
@@ -149,7 +155,7 @@ function skill_dados_classes(_id) {
 
         // ===== MENESTREL =====
         case SKILL_ID.mene_basico:
-            return new Skill("Dedilhada", 2, 2, STAT.tecnica, SKILL_TIPO.dano);
+            return new Skill("Gancho de Vaudeville", 2, 2, STAT.tecnica, SKILL_TIPO.dano);
         case SKILL_ID.mene_cura:
             return skill_alcance(skill_cd(new Skill("Canção de Cura", 4, 2, STAT.vitalidade, SKILL_TIPO.cura), 4), ALCANCE.global);
         case SKILL_ID.mene_desespero:
@@ -193,7 +199,7 @@ function skill_dados_classes(_id) {
         case SKILL_ID.escu_basico:
             return new Skill("Escudada", 2, 2, STAT.forca, SKILL_TIPO.dano);
         case SKILL_ID.escu_tartaruga:
-            s = skill_alcance(skill_cd(new Skill("Formação Tartaruga", 3, 0, STAT.vitalidade, SKILL_TIPO.defesa), 4), ALCANCE.global);
+            s = skill_alcance(skill_cd(new Skill("Formação Tartaruga", 0, 0, STAT.vitalidade, SKILL_TIPO.defesa), 4), ALCANCE.global);
             s.exclui_si = true;
             return s;
         case SKILL_ID.escu_refletor:
@@ -210,7 +216,7 @@ function skill_dados_classes(_id) {
 
         // ===== LUNÁTICO =====
         case SKILL_ID.luna_basico:
-            return new Skill("Cabeçada", 2, 2, STAT.forca, SKILL_TIPO.dano);
+            return new Skill("Talhar", 2, 2, STAT.forca, SKILL_TIPO.dano);
         case SKILL_ID.luna_palacio:
             s = skill_efeito(skill_cd(new Skill("Palácio Mental", 3, 0, STAT.vitalidade, SKILL_TIPO.buff), 4), STATUS.regeneracao, 3, 2);
             s.so_si = true;
@@ -247,51 +253,90 @@ function inimigo_sortear_skills(_e, _n) {
 function inimigo_novo(_id, _origem) {
     var e = new Personagem("Inimigo");
     var cl = CLASSE.escudeiro;
+	var fixo = false;   // <-- adicione isso
     switch (_id) {
-        case ENEMY_ID.besta:
-            e.nome = "Besta das Ruínas";
-            e.stats[STAT.vitalidade] = 2;
-            e.stats[STAT.forca] = 2;
-            e.skills = [skill_nova(SKILL_ID.mordida), skill_nova(SKILL_ID.investida)];
-            cl = CLASSE.lunatico;
-            break;
-        case ENEMY_ID.saqueador:
-            e.nome = "Saqueador";
-            e.stats[STAT.vitalidade] = 2;
-            e.stats[STAT.forca] = 2;
-            e.stats[STAT.tecnica] = 2;
-            e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
-            cl = CLASSE.mineirador;
-            break;
-        case ENEMY_ID.sentinela:
-            e.nome = "Sentinela";
-            e.stats[STAT.vitalidade] = 2;
-            e.skills = [skill_nova(SKILL_ID.disparo), skill_nova(SKILL_ID.sobrecarga)];
-            cl = CLASSE.acolito;
-            break;
-        case ENEMY_ID.rato:
-            e.nome = "Rato Mutante";
-            e.stats[STAT.vitalidade] = 0;
+                case ENEMY_ID.mosquito:
+            e.nome = "Mosquito Gigante";
+            e.stats[STAT.vitalidade] = 1;
             e.stats[STAT.forca] = 1;
-            e.skills = [skill_nova(SKILL_ID.mordida)];
-            cl = CLASSE.lunatico;
+            e.stats[STAT.tecnica] = 3;
+            e.skills = [skill_nova(SKILL_ID.mordida), skill_nova(SKILL_ID.acido)];
+            cl = CLASSE.lunatico; fixo = true;
+            visual_fixo(e, cl, _origem, spr_mosquito, noone);
             break;
-        case ENEMY_ID.guarda:
-            e.nome = "Guarda do Posto";
-            e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.rajada)];
-            cl = CLASSE.escudeiro;
+        case ENEMY_ID.zumbi:
+            e.nome = "Zumbi";
+            e.stats[STAT.vitalidade] = 5;
+            e.stats[STAT.forca] = 3;
+            e.skills = [skill_nova(SKILL_ID.pancada), skill_nova(SKILL_ID.mordida)];
+            cl = CLASSE.lunatico; fixo = true;
+            visual_fixo(e, cl, _origem, spr_zombie, noone);
             break;
-        case ENEMY_ID.colosso:
-            e.nome = "Colosso das Ruínas";
-            e.stats[STAT.vitalidade] = 8;
-            e.stats[STAT.forca] = 5;
+        case ENEMY_ID.espadachim:
+            e.nome = "Espada demôníaca";
+            e.stats[STAT.vitalidade] = 3;
+            e.stats[STAT.forca] = 4;
+            e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.investida)];
+            cl = CLASSE.escudeiro; fixo = true;
+            visual_fixo(e, cl, _origem, spr_sword, noone);
+            break;
+        case ENEMY_ID.demonio:
+            e.nome = "Demônio";
+            e.stats[STAT.vitalidade] = 10;
+            e.stats[STAT.imaginacao] = 3;
+            e.skills = [skill_nova(SKILL_ID.chama), skill_nova(SKILL_ID.explosao), skill_nova(SKILL_ID.improviso)];
+            cl = CLASSE.acolito; fixo = true;
+            visual_fixo(e, cl, _origem, spr_demon, noone);
+            break;
+        case ENEMY_ID.mascara:
+            e.nome = "Máscara";
+            e.stats[STAT.vitalidade] = 2;
+            e.stats[STAT.imaginacao] = 3;
+            e.stats[STAT.carisma] = 4;
+            e.skills = [skill_nova(SKILL_ID.acido), skill_nova(SKILL_ID.rede)];
+            cl = CLASSE.menestrel; fixo = true;
+            visual_fixo(e, cl, _origem, spr_mask, noone);
+            break;
+        case ENEMY_ID.totem:
+            e.nome = "Totem";
+            e.stats[STAT.vitalidade] = 5;
+            e.stats[STAT.forca] = 1;
+            e.stats[STAT.imaginacao] = 3;
+            e.skills = [skill_nova(SKILL_ID.defender), skill_nova(SKILL_ID.remendo), skill_nova(SKILL_ID.estilhacos)];
+            cl = CLASSE.escudeiro; fixo = true;
+            visual_fixo(e, cl, _origem, spr_totem, noone);
+            break;
+        case ENEMY_ID.lobo:
+            e.nome = "Lobo";
+            e.stats[STAT.vitalidade] = 2;
+            e.stats[STAT.forca] = 3;
+            e.skills = [skill_nova(SKILL_ID.mordida), skill_nova(SKILL_ID.investida)];
+            cl = CLASSE.lunatico; fixo = true;
+            visual_fixo(e, cl, _origem, spr_wolf, noone);
+            break;
+        case ENEMY_ID.domador:
+            e.nome = "Domador";
+            e.stats[STAT.vitalidade] = 2;
+            e.stats[STAT.tecnica] = 3;
+            e.stats[STAT.carisma] = 3;
+            e.skills = [skill_nova(SKILL_ID.disparo), skill_nova(SKILL_ID.rede), skill_nova(SKILL_ID.estimulante)];
+            cl = CLASSE.mineirador; fixo = true;
+            visual_fixo(e, cl, _origem, spr_tamer, noone);
+            break;
+        case ENEMY_ID.sombra:
+            e.nome = "Sombra";
+            e.stats[STAT.vitalidade] = 2;
             e.stats[STAT.tecnica] = 4;
-            e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.investida), skill_nova(SKILL_ID.estilhacos), skill_nova(SKILL_ID.atordoar)];
-            cl = CLASSE.lunatico;
+            e.skills = [skill_nova(SKILL_ID.tiro), skill_nova(SKILL_ID.rede), skill_nova(SKILL_ID.atordoar)];
+            cl = CLASSE.acolito; fixo = true;
+            visual_fixo(e, cl, _origem, spr_shadow, noone);
             break;
+			
     }
-    inimigo_sortear_skills(e, 1);
-    visual_aleatorio(e, cl, _origem);
+        if (!fixo) {
+        inimigo_sortear_skills(e, 1);
+        visual_aleatorio(e, cl, _origem);
+    }
     p_curar_total(e);
     return e;
 }
@@ -301,6 +346,8 @@ function montar_inimigos(_c) {
     var n_total = min(array_length(_c.inimigos), MAX_INIMIGOS);
     for (var i = 0; i < n_total; i++) {
         var e = inimigo_novo(_c.inimigos[i], _c.origin);
+        e.hp_mult = areas[area_atual].hp_mult;
+        p_curar_total(e);
         var n = 0;
         for (var j = 0; j < i; j++) {
             if (string_pos(e.nome, inimigos[j].nome) == 1) n++;
@@ -407,14 +454,46 @@ function carta_flavors(_c, _f1, _f2, _f3) {
 function criar_deck_jogo() {
     var deck = [];
     var c;
+	
+	    var av = [AREA.av_12, AREA.av_23, AREA.av_31];
 
-    c = new Card();
-    c.name = "Besta das Ruínas";
-    c.description = "Uma criatura mutante bloqueia a passagem estreita do túnel subterrâneo.";
-    c.tipo = CARD_TIPO.hostil;
-    c.inimigos = [ENEMY_ID.besta];
-    c.recompensa_valor = 3;
-    array_push(deck, c);
+    // ----- ruínas avançadas e coração do setor -----
+    array_push(deck, carta_hostil("Nuvem de Mosquitos", "Um zumbido grave vem do escuro. São grandes demais para serem insetos comuns.",
+        CARD_ORIGIN.neutral, [ENEMY_ID.mosquito, ENEMY_ID.mosquito], 6,
+        [AREA.av_12, AREA.av_23, AREA.av_31, AREA.meio]));
+    array_push(deck, carta_hostil("Os Que Ficaram", "Corpos que ainda andam. Ninguém lembra por quê.",
+        CARD_ORIGIN.neutral, [ENEMY_ID.zumbi, ENEMY_ID.zumbi], 7,
+        [AREA.av_12, AREA.av_23, AREA.av_31, AREA.meio]));
+    array_push(deck, carta_hostil("Horda do Setor", "Zumbis e mosquitos disputam a mesma carniça, e agora você.",
+        CARD_ORIGIN.neutral, [ENEMY_ID.zumbi, ENEMY_ID.mosquito, ENEMY_ID.mosquito], 9,
+        [AREA.av_12, AREA.av_23, AREA.av_31, AREA.meio]));
+    array_push(deck, carta_hostil("Sombra nas Ruínas", "Algo se move onde não há luz. Não faz barulho.",
+        CARD_ORIGIN.neutral, [ENEMY_ID.sombra], 5,
+        [AREA.av_12, AREA.av_23, AREA.av_31, AREA.meio]));
+
+    // ----- facção 2: território, fronteiras 1-2 e 2-3, ruínas avançadas (só demônio) -----
+    array_push(deck, carta_hostil("Lâmina Solitária", "Um espadachim bloqueia a trilha e não quer conversa.",
+        CARD_ORIGIN.faction_2, [ENEMY_ID.espadachim], 4,
+        [AREA.ini_2, AREA.ent_12, AREA.ent_23]));
+    array_push(deck, carta_hostil("Pacto Quebrado", "Um demônio e seu espadachim cobram uma dívida antiga.",
+        CARD_ORIGIN.faction_2, [ENEMY_ID.demonio, ENEMY_ID.espadachim], 8,
+        [AREA.ini_2, AREA.ent_12, AREA.ent_23, AREA.av_12, AREA.av_23, AREA.av_31]));
+
+    // ----- facção 3: território, fronteiras 2-3 e 3-1, ruínas avançadas (só totem) -----
+    array_push(deck, carta_hostil("Rosto Sem Rosto", "Uma máscara flutua à sua frente, sorrindo.",
+        CARD_ORIGIN.faction_3, [ENEMY_ID.mascara], 4,
+        [AREA.ini_3, AREA.ent_23, AREA.ent_31]));
+    array_push(deck, carta_hostil("Círculo do Totem", "O totem protege a máscara, e a máscara o amaldiçoa.",
+        CARD_ORIGIN.faction_3, [ENEMY_ID.totem, ENEMY_ID.mascara], 8,
+        [AREA.ini_3, AREA.ent_23, AREA.ent_31, AREA.av_12, AREA.av_23, AREA.av_31]));
+
+    // ----- facção 1: território, fronteiras 1-2 e 3-1, ruínas avançadas (só domador) -----
+    array_push(deck, carta_hostil("Lobo Faminto", "Pegadas frescas, e um rosnado atrás de você.",
+        CARD_ORIGIN.faction_1, [ENEMY_ID.lobo], 4,
+        [AREA.ini_1, AREA.ent_12, AREA.ent_31]));
+    array_push(deck, carta_hostil("Domador e Matilha", "Um domador assobia, e os lobos respondem.",
+        CARD_ORIGIN.faction_1, [ENEMY_ID.domador, ENEMY_ID.lobo, ENEMY_ID.lobo], 8,
+        [AREA.ini_1, AREA.ent_12, AREA.ent_31, AREA.av_12, AREA.av_23, AREA.av_31]));
 
     c = new Card();
     c.name = "Patrulha Saqueadora";
@@ -434,22 +513,7 @@ function criar_deck_jogo() {
     c.recompensa_valor = 4;
     array_push(deck, c);
 
-    c = new Card();
-    c.name = "Ninho de Mutantes";
-    c.description = "Dois ratos do tamanho de cães saem do escuro, famintos.";
-    c.tipo = CARD_TIPO.hostil;
-    c.inimigos = [ENEMY_ID.rato, ENEMY_ID.rato];
-    c.recompensa_valor = 4;
-    array_push(deck, c);
 
-    c = new Card();
-    c.name = "Emboscada Saqueadora";
-    c.description = "Um bando inteiro estava esperando você sair do corredor.";
-    c.origin = CARD_ORIGIN.faction_3;
-    c.tipo = CARD_TIPO.hostil;
-    c.inimigos = [ENEMY_ID.saqueador, ENEMY_ID.saqueador, ENEMY_ID.rato, ENEMY_ID.rato];
-    c.recompensa_valor = 7;
-    array_push(deck, c);
 
     c = new Card();
     c.name = "Comerciante Errante";
@@ -784,7 +848,7 @@ function acao_iniciar_run(_fac) {
     if (run_missao != undefined) {
         var m = missoes[run_missao.d][run_missao.i];
         if (m.tipo == MISSAO_TIPO.escolta) {
-            escoltado = aliado_de_classe(irandom(CLASSE.count - 1), origem_da_faccao(run_missao.d));
+escoltado = aliado_de_classe(irandom(CLASSE.count - 1), origem_da_faccao(_fac));
             array_push(aliados, escoltado);
             cutscene_tocar(CUT.tut_escolta);
         } else if (m.tipo == MISSAO_TIPO.entrega) {
@@ -898,7 +962,7 @@ function acao_mostrar_card(_c) {
         montar_inimigos(_c);
         figura_evento = inimigos[0];
     } else if (_c.tipo == CARD_TIPO.amigavel) {
-        figura_evento = aliado_de_classe(_c.aliado_classe, _c.origin);
+        figura_evento = aliado_de_classe(_c.aliado_classe, origem_da_faccao(faccao_atual))
     } else if (_c.sprite_interacao == noone) {
         figura_evento = figurante_novo(_c.origin);
     }
@@ -981,7 +1045,7 @@ function acao_aplicar_recompensa(_c) {
 		    if (array_length(aliados) < MAX_GRUPO - 1) {
 		        // usa o personagem mostrado no card; se ele não existir mais, cria um novo da classe
 		        if (_c.tipo == CARD_TIPO.amigavel && is_struct(figura_evento)) novo = figura_evento;
-		        else novo = aliado_de_classe(_c.aliado_classe, _c.origin);
+		        else novo = aliado_de_classe(_c.aliado_classe, origem_da_faccao(faccao_atual));
 		        array_push(aliados, novo);
 		        return nome_da_classe(_c.aliado_classe) + " se juntou ao seu grupo!";
 		    }
@@ -1148,6 +1212,7 @@ function step_preparacao() {
             } else if (util_in(box_hub(1))) {
                 prep_tela = PREP_TELA.habilidades;
                 hab_msg = "";
+                cutscene_tocar(CUT.tut_habilidades);
             } else if (util_in(box_hub(2))) {
                 prep_tela = PREP_TELA.dialogo;
             } else if (util_in(box_hub(3))) {
@@ -1334,6 +1399,40 @@ function skill_desbloqueada(_id) {
     var pool = skills_desbloqueadas();
     for (var i = 0; i < array_length(pool); i++) {
         if (pool[i] == _id) return true;
+    }
+    return false;
+}
+
+function carta_hostil(_nome, _desc, _origem, _inimigos, _valor, _areas) {
+    var c = new Card();
+    c.name = _nome;
+    c.description = _desc;
+    c.origin = _origem;
+    c.tipo = CARD_TIPO.hostil;
+    c.inimigos = _inimigos;
+    c.recompensa_valor = _valor;
+    c.areas = _areas;
+    return c;
+}
+
+// [mínimo, máximo] de inimigos por combate na área
+function area_limite_inimigos(_a) {
+    switch (_a) {
+        case AREA.ini_1: case AREA.ini_2: case AREA.ini_3: return [1, 1];
+        case AREA.ent_12: case AREA.ent_23: case AREA.ent_31: return [1, 3];
+    }
+    return [4, 4];
+}
+
+function carta_na_area(_c) {
+    if (_c.tipo == CARD_TIPO.hostil) {
+        var n = array_length(_c.inimigos);
+        var lim = area_limite_inimigos(area_atual);
+        if (n < lim[0] || n > lim[1]) return false;
+    }
+    if (array_length(_c.areas) == 0) return true;
+    for (var i = 0; i < array_length(_c.areas); i++) {
+        if (_c.areas[i] == area_atual) return true;
     }
     return false;
 }

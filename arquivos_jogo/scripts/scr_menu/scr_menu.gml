@@ -107,7 +107,8 @@ function draw_menu_creditos() {
         "Kaue Ferreira Motta  -  Programação",
         "Leandro Pinho Gonçalves -  Arte",
         "Lyam Santos Peres  -  Programação",
-        "Rafael Oliveira dos Santos  -  Programação"
+        "Rafael Oliveira dos Santos  -  Programação",
+		"Música de terceiros licensiada em Creative Commons Free Use. Autoria por Eclipzodiac (eclipzodiac.itch.io)."
     ];
     for (var i = 0; i < array_length(linhas); i++) {
         draw_set_color(c_white);

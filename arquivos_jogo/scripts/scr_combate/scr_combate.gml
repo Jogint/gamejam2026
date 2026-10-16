@@ -32,6 +32,7 @@ function skill_usavel(_s) {
 }
 
 function skill_tempo(_ator, _s) {
+    if (_s.tipo == SKILL_TIPO.defesa) return 0;   // bloqueios sempre saem primeiro
     var t = _s.tempo;
     if (status_tem(_ator, STATUS.lentidao)) t += status_valor(_ator, STATUS.lentidao);
     if (status_tem(_ator, STATUS.celeridade)) t -= status_valor(_ator, STATUS.celeridade);

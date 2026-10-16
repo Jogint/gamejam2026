@@ -4,6 +4,10 @@ function Area(_nome, _niveis, _vizinhos) constructor {
     niveis = _niveis;
     vizinhos = _vizinhos;   // AREA que dá para alcançar a partir daqui
     nivel_fixo = 5;         // nível do ponto fixo de herança (-1 = nenhum)
+	bg = noone;          // sprite de fundo
+    bg_cor = c_white;    // image_blend
+    bg_inverter = false; // inverte as cores
+	hp_mult = 1;         // multiplicador de vida dos inimigos nesta área
 }
 
 // AREA.ini_1..ini_3 têm o mesmo índice de FACTION (0..2)
@@ -24,7 +28,29 @@ function criar_areas() {
 
     a[AREA.meio] = new Area("Coração do Setor", 10, []);
     a[AREA.meio].nivel_fixo = -1;   // o último nível é o chefe final
+	
+	    // ----- backgrounds -----
+    a[AREA.ini_1].bg = spr_forestnight;
+    a[AREA.ini_2].bg = spr_bog;
+    a[AREA.ini_3].bg = spr_mystic;
 
+    a[AREA.ent_12].bg = spr_forestnight;  a[AREA.ent_12].bg_cor = c_red;
+    a[AREA.ent_23].bg = spr_bog;          a[AREA.ent_23].bg_cor = c_lime;
+    a[AREA.ent_31].bg = spr_mystic;       a[AREA.ent_31].bg_cor = c_blue;
+
+    a[AREA.av_12].bg = spr_cave;
+    a[AREA.av_23].bg = spr_cave;
+    a[AREA.av_31].bg = spr_cave;
+
+    a[AREA.meio].bg = spr_cave;
+    a[AREA.meio].bg_inverter = true;
+	
+	    // ----- vida dos inimigos -----
+    a[AREA.av_12].hp_mult = 1.15;
+    a[AREA.av_23].hp_mult = 1.15;
+    a[AREA.av_31].hp_mult = 1.15;
+    a[AREA.meio].hp_mult  = 1.30;
+	
     return a;
 }
 
@@ -34,6 +60,9 @@ function area_aplicar() {
     nome_area = a.nome;
     nivel_max_expedicao = a.niveis;
     nivel_fixo = a.nivel_fixo;
+    bg_atual = a.bg;
+    bg_cor = a.bg_cor;
+    bg_inverter = a.bg_inverter;
 }
 
 function acao_entrar_area(_a) {
@@ -87,6 +116,7 @@ function draw_expedicao() {
         draw_botao(box_avancar(), "Avançar na Expedição", c_lime, c_black, HV.avancar, true);
     }
 
-    draw_botao(box_retorno(), "Retornar à Base (Custa " + string(calcular_custo_retorno()) + " Tempo)", c_orange, c_black, HV.retorno, pode_retornar());
+    var h_chegada = tempo_para_relogio(tempo - calcular_custo_retorno(), tempo_run_max);
+    draw_botao(box_retorno(), "Retornar à Base (Chegada às " + h_chegada + ")", c_orange, c_black, HV.retorno, pode_retornar());
     draw_trilha();
 }

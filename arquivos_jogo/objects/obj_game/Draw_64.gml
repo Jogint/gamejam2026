@@ -23,6 +23,7 @@ if (cs_ativa && !cutscene_eh_tutorial(cs_id)) {
 if (estado == GAME_STATE.preparacao) {
     draw_preparacao();
 } else {
+	draw_background();
     draw_paineis();
 
     switch (estado) {

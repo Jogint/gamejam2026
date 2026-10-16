@@ -13,7 +13,7 @@ function sprite_por_nome(_nome) {
 // Cria as listas de sprites. Chamar UMA vez no Create do obj_game.
 function criar_biblioteca_sprites() {
     // índice = CARD_ORIGIN (1 = facção 1, 2 = facção 2, 3 = facção 3)
-    var cores = ["", "red", "teal", "blue"];
+    var cores = ["", "blue", "red", "teal"];   // F1 azul, F2 vermelha, F3 verde
 
     // nomes dos sprites na mesma ordem do enum CLASSE
     var tipos = ["shielder", "miner", "ministrel", "lunatic", "acolyte"];
@@ -50,9 +50,9 @@ function criar_biblioteca_sprites() {
     lib_player[FACTION.faction_3] = lib_corpos[CLASSE.menestrel][CARD_ORIGIN.faction_3];
 
     lib_lideres = array_create(FACTION.count);
-    lib_lideres[FACTION.faction_1] = lib_corpos[CLASSE.escudeiro][CARD_ORIGIN.faction_1];
-    lib_lideres[FACTION.faction_2] = lib_corpos[CLASSE.acolito][CARD_ORIGIN.faction_2];
-    lib_lideres[FACTION.faction_3] = lib_corpos[CLASSE.menestrel][CARD_ORIGIN.faction_3];
+	lib_lideres[FACTION.faction_1] = sprite_por_nome("spr_leader");     // azul
+	lib_lideres[FACTION.faction_2] = sprite_por_nome("spr_leader_1");   // vermelho
+	lib_lideres[FACTION.faction_3] = sprite_por_nome("spr_leader_2");   // verde
 }
 
 // FACTION (0..2) -> CARD_ORIGIN (1..3)
@@ -140,4 +140,14 @@ function criar_lideres() {
         array_push(l, lider_novo(f));
     }
     return l;
+}
+
+// inimigos usam sempre uma cor diferente da facção do jogador
+function origem_inimigo(_o) {
+    var meu = origem_da_faccao(faccao_atual);
+    var o = (_o == CARD_ORIGIN.faction_4) ? CARD_ORIGIN.faction_3 : _o;
+    if (o == CARD_ORIGIN.neutral || o == meu) {
+        do { o = irandom_range(1, 3); } until (o != meu);
+    }
+    return o;
 }

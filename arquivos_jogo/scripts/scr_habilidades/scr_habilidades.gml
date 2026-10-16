@@ -8,6 +8,7 @@ function hab_iniciar() {
     hab_slots = [];
     for (var f = 0; f < FACTION.count; f++) {
         hab_desbloq[f] = array_create(HAB_TOTAL, false);
+		for (var j = 0; j < HAB_TOTAL; j += HAB_LINHAS) hab_desbloq[f][j] = true;   // linha 0 de cada classe
         hab_slots[f] = array_create(HAB_SLOTS, -1);
         hab_slots[f][0] = SKILL_ID.golpe;
     }

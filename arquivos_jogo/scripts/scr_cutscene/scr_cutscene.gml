@@ -6,7 +6,8 @@
 enum DEST {
     nenhum, hub_menu, hub_iniciar, reserva, missoes_quadro,
     trilha, avancar, retorno, hud_relogio, hud_skills, hud_aliados,
-    opcoes_evento, opcao_contornar, card, slots_grupo, fila_combate
+    opcoes_evento, opcao_contornar, card, slots_grupo, fila_combate,
+    hab_arvore, hab_equipadas
 }
 
 function box_uniao(_a, _b) {
@@ -31,6 +32,8 @@ function cs_dest_rect(_d) {
         case DEST.card:            return box_card();
         case DEST.slots_grupo:     return box_uniao(box_slot_party(0), box_slot_party(array_length(get_grupo()) - 1));
         case DEST.fila_combate:    return [24, 255, 660, 515];
+		case DEST.hab_arvore:      return box_uniao(box_hab(0, 0), box_hab(HAB_COLUNAS - 1, HAB_LINHAS - 1));
+        case DEST.hab_equipadas:   return [24, 466, 806, 556];
     }
     return undefined;
 }
@@ -408,6 +411,15 @@ function cutscene_slides(_id) {
             s = [
                 cs_slide("Você chegou ao fim desta área. Resolva o que houver aqui e escolha para onde seguir. Cada área nova zera o contador de níveis, mas o custo de retorno continua acumulando.", "bifurcação no caminho", tut, noone, DEST.card),
                 cs_slide("Mais adiante, as áreas avançadas levam ao Coração do Setor. É lá que o caminho termina.", "o centro do mapa", tut, noone, DEST.nenhum)
+            ];
+            break;
+		
+		        case CUT.tut_habilidades:
+            s = [
+                cs_slide("Esta é a árvore de Habilidades. Cada coluna é uma classe. Desbloqueie de cima para baixo, gastando a reserva da facção atual.", "árvore de habilidades", tut, noone, DEST.hab_arvore),
+                cs_slide("Aqui ficam as habilidades equipadas. O primeiro slot é o ataque básico, obrigatório. Clique numa habilidade desbloqueada para equipá-la ou tirá-la.", "habilidades equipadas", tut, noone, DEST.hab_equipadas),
+                cs_slide("Importante: volte sempre a esta tela antes de iniciar cada expedição para equipar suas habilidades. O equipamento é separado por facção, então cada novo personagem precisa ser equipado de novo.", "equipar antes de partir", tut, noone, DEST.hab_equipadas),
+                cs_slide("Atenção: tudo o que você desbloqueia aqui volta no futuro. Quando você trocar de facção, essas habilidades passam a aparecer nos inimigos que enfrentar.", "habilidades passando de mão em mão", tut, noone, DEST.hab_arvore)
             ];
             break;
     }

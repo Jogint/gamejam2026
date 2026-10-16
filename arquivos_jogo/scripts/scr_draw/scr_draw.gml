@@ -97,7 +97,10 @@ function draw_botao(_b, _txt, _cor, _cor_txt, _hv_id, _ativo) {
     draw_set_color(_ativo ? _cor_txt : c_gray);
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);
-    draw_text((_b[0] + _b[2]) / 2, (_b[1] + _b[3]) / 2, _txt);
+    var tw = string_width(_txt);
+    var larg = (_b[2] - _b[0]) - 16;
+    var esc = (tw > larg && tw > 0) ? larg / tw : 1;
+    draw_text_transformed((_b[0] + _b[2]) / 2, (_b[1] + _b[3]) / 2, _txt, esc, esc, 0);
     draw_set_halign(fa_left);
     draw_set_valign(fa_top);
 }
@@ -224,7 +227,7 @@ function draw_slot_personagem(_b, _p, _hv_id, _valido, _flip) {
         }
     }
 
-    draw_hp_barra(x1 + 10, y2 - 42, x2 - 10, y2 - 24, _p);
+    draw_hp_barra(x1 + 10, y2 + 120, x2 - 10, y2 + 100, _p);
 }
 
 function draw_paineis() {
@@ -294,7 +297,7 @@ function draw_opcao_card(_i) {
 
     draw_set_valign(fa_middle);
     draw_set_color(c_white);
-    draw_text(b[0] + 12, cy, string(_i + 1) + ". " + opcao_flavor(opt));
+        draw_texto_largura(b[0] + 12, cy, string(_i + 1) + ". " + opcao_flavor(opt), (xi - 10) - (b[0] + 12));
 
     draw_icone_stat(opt.stat, xi, cy - 10, 20);
     draw_set_color(c_yellow);
@@ -308,6 +311,7 @@ function draw_card() {
     if (carta_atual == undefined) return;
     var c = carta_atual;
     var b = box_card();
+    var larg = (b[2] - b[0]) - 40;
 
     draw_set_halign(fa_center);
     draw_set_color(c_yellow);
@@ -331,18 +335,19 @@ function draw_card() {
     draw_set_halign(fa_left);
 
     draw_set_color(c_white);
-    draw_text(b[0] + 20, b[1] + 15, c.name);
+    draw_texto_largura(b[0] + 20, b[1] + 15, c.name, larg - 170);
     draw_set_color(c_ltgray);
-    draw_text_ext(b[0] + 20, b[1] + 45, c.description, 20, (b[2] - b[0]) - 40);
+    draw_texto_caixa(b[0] + 20, b[1] + 45, c.description, 20, larg, carta_resolvida ? 100 : 140);
 
+    // recompensa/penalidade: some depois de resolvido (exceto no combate)
     if (c.tipo == CARD_TIPO.hostil) {
         draw_set_color(c_aqua);
-        draw_text(b[0] + 20, b[1] + 190, "Vitória: +" + string(c.recompensa_valor) + " Recursos");
-    } else if (c.tipo == CARD_TIPO.evento || c.tipo == CARD_TIPO.amigavel) {
+        draw_texto_largura(b[0] + 20, b[1] + 190, "Vitória: +" + string(c.recompensa_valor) + " Recursos", larg);
+    } else if (!carta_resolvida && (c.tipo == CARD_TIPO.evento || c.tipo == CARD_TIPO.amigavel)) {
         draw_set_color(c_aqua);
-        draw_text(b[0] + 20, b[1] + 190, "Sucesso: " + texto_recompensa(c));
+        draw_texto_largura(b[0] + 20, b[1] + 190, "Sucesso: " + texto_recompensa(c), larg);
         draw_set_color(c_orange);
-        draw_text(b[0] + 20, b[1] + 215, "Falha: Avança +" + string(c.fail_tempo) + " min no Relógio");
+        draw_texto_largura(b[0] + 20, b[1] + 215, "Falha: Avança +" + string(c.fail_tempo) + " min no Relógio", larg);
     }
 
     if (!carta_resolvida) {
@@ -351,9 +356,11 @@ function draw_card() {
         }
         draw_botao(box_opcao(3), "4. Contornar o obstáculo  (Avança +" + string(custo_contornar) + " min no Relógio)", c_maroon, c_white, HV.opcao + 3, true);
     } else {
+        var my_ = (c.tipo == CARD_TIPO.hostil) ? b[1] + 225 : b[1] + 150;
         draw_set_color(c_yellow);
-        draw_text_ext(b[0] + 20, b[1] + 250, card_msg, 22, (b[2] - b[0]) - 40);
-        draw_text(b[0] + 20, b[1] + 295, "[ Clique para continuar ]");
+        draw_texto_caixa(b[0] + 20, my_, card_msg, 22, larg, (b[3] - 35) - my_);
+        draw_set_color(c_gray);
+        draw_text(b[0] + 20, b[3] - 28, "[ Clique para continuar ]");
     }
     draw_set_color(c_white);
 }
@@ -568,7 +575,7 @@ function draw_hud() {
     draw_text(950, 590, "Recursos: " + string(recurso));
 
     draw_set_color(tempo < 60 ? c_red : c_yellow);
-    draw_text(950, 625, "Horário: " + hora_texto + " (Amanhecer: 06:00 AM)");
+    draw_texto_largura(950, 625, "Horário: " + hora_texto, 300);
 
     var r = clamp(tempo_vis / tempo_run_max, 0, 1);
     draw_set_color(c_black);
@@ -620,7 +627,7 @@ function draw_painel_lider() {
     draw_set_color(c_white);
     draw_set_halign(fa_center);
     draw_text(1100, 40, l.nome);
-    draw_personagem(l, 1100, 440, 2, true, true);
+    draw_personagem(l, 1100, 440, 2 * 0.85, true, true);
     draw_set_halign(fa_left);
 }
 
@@ -889,4 +896,35 @@ function draw_preparacao() {
 		case PREP_TELA.habilidades: draw_prep_habilidades(); break;
     }
     draw_set_color(c_white);
+}
+
+function draw_background() {
+    if (bg_atual == noone || !sprite_exists(bg_atual)) return;
+
+    if (bg_inverter) {
+        // inversão: fundo branco menos o sprite
+        draw_set_alpha(1);
+        draw_set_color(c_white);
+        draw_rectangle(0, 0, 1280, 720, false);
+        gpu_set_blendmode(bm_subtract);
+        draw_sprite_stretched_ext(bg_atual, 0, 0, 0, 1280, 720, bg_cor, 1);
+        gpu_set_blendmode(bm_normal);
+    } else {
+        draw_sprite_stretched_ext(bg_atual, 0, 0, 0, 1280, 720, bg_cor, 1);
+    }
+    draw_set_color(c_white);
+}
+
+// uma linha só: encolhe o texto se passar da largura
+function draw_texto_largura(_x, _y, _txt, _maxw) {
+    var tw = string_width(_txt);
+    var e = (tw > _maxw && tw > 0) ? _maxw / tw : 1;
+    draw_text_transformed(_x, _y, _txt, e, e, 0);
+}
+
+// várias linhas: encolhe o texto até caber na altura _h
+function draw_texto_caixa(_x, _y, _txt, _sep, _w, _h) {
+    var e = 1;
+    while (e > 0.55 && string_height_ext(_txt, _sep, _w / e) * e > _h) e -= 0.05;
+    draw_text_ext_transformed(_x, _y, _txt, _sep, _w / e, e, e, 0);
 }

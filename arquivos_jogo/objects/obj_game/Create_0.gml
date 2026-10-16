@@ -15,7 +15,7 @@ origem_cores = [c_white, c_red, c_aqua, c_orange, c_fuchsia];
 // por facção
 estoque_faccoes = array_create(FACTION.count, 0);
 reserva = array_create(FACTION.count, 0);
-for (var f = 0; f < FACTION.count; f++) reserva[f] = 300;
+for (var f = 0; f < FACTION.count; f++) reserva[f] = 5;
 deck_global = criar_deck_jogo();
 upgrades = criar_upgrades();
 upgrades_comprados = [];
@@ -90,6 +90,7 @@ c_tempos = [];
 c_rodada = 1;
 c_recompensa = 0;
 c_resultado = COMBAT_RES.nenhum;
+origem_cores = [c_white, make_color_rgb(70, 120, 255), c_red, c_lime, c_fuchsia];
 
 ultima_carta = undefined;
 figura_evento = undefined;
@@ -106,3 +107,11 @@ estado = GAME_STATE.preparacao;   // começa no hub
 menu_ativo = true;
 menu_tela = 0;   // 0 = principal, 1 = créditos
 menu_anim = array_create(MENU_BTNS + 1, 0);
+
+global.musica_atual = -1;
+global.musica_inst  = -1;
+musica_tocar(mus_main);
+
+window_set_fullscreen(true);
+
+// Inicialize UMA vez (Create do objeto de controle, antes de qualquer chamada)
