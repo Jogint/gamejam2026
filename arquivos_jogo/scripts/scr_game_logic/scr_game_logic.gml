@@ -246,14 +246,14 @@ function inimigo_sortear_skills(_e, _n) {
 
 function inimigo_novo(_id, _origem) {
     var e = new Personagem("Inimigo");
-    var cl = CLASSE.soldado;
+    var cl = CLASSE.escudeiro;
     switch (_id) {
         case ENEMY_ID.besta:
             e.nome = "Besta das Ruínas";
             e.stats[STAT.vitalidade] = 2;
             e.stats[STAT.forca] = 2;
             e.skills = [skill_nova(SKILL_ID.mordida), skill_nova(SKILL_ID.investida)];
-            cl = CLASSE.mutante;
+            cl = CLASSE.lunatico;
             break;
         case ENEMY_ID.saqueador:
             e.nome = "Saqueador";
@@ -261,25 +261,25 @@ function inimigo_novo(_id, _origem) {
             e.stats[STAT.forca] = 2;
             e.stats[STAT.tecnica] = 2;
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
-            cl = CLASSE.soldado;
+            cl = CLASSE.mineirador;
             break;
         case ENEMY_ID.sentinela:
             e.nome = "Sentinela";
             e.stats[STAT.vitalidade] = 2;
             e.skills = [skill_nova(SKILL_ID.disparo), skill_nova(SKILL_ID.sobrecarga)];
-            cl = CLASSE.maquina;
+            cl = CLASSE.acolito;
             break;
         case ENEMY_ID.rato:
             e.nome = "Rato Mutante";
             e.stats[STAT.vitalidade] = 0;
             e.stats[STAT.forca] = 1;
             e.skills = [skill_nova(SKILL_ID.mordida)];
-            cl = CLASSE.mutante;
+            cl = CLASSE.lunatico;
             break;
         case ENEMY_ID.guarda:
             e.nome = "Guarda do Posto";
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.rajada)];
-            cl = CLASSE.soldado;
+            cl = CLASSE.escudeiro;
             break;
         case ENEMY_ID.colosso:
             e.nome = "Colosso das Ruínas";
@@ -287,7 +287,7 @@ function inimigo_novo(_id, _origem) {
             e.stats[STAT.forca] = 5;
             e.stats[STAT.tecnica] = 4;
             e.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.investida), skill_nova(SKILL_ID.estilhacos), skill_nova(SKILL_ID.atordoar)];
-            cl = CLASSE.mutante;
+            cl = CLASSE.lunatico;
             break;
     }
     inimigo_sortear_skills(e, 1);
@@ -310,14 +310,67 @@ function montar_inimigos(_c) {
     }
 }
 
-function aliado_novo(_nome, _origem) {
-    var a = new Personagem(_nome);
-    a.stats[STAT.vitalidade] = 2;
-    a.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.remendo)];
-    visual_aleatorio(a, CLASSE.civil, _origem);
-    p_curar_total(a);
-    return a;
+// ================= ALIADOS POR CLASSE =================
+// id da skill básica de cada classe (as 4 seguintes do enum são as outras da classe)
+function classe_skill_base(_c) {
+    switch (_c) {
+        case CLASSE.escudeiro:  return SKILL_ID.escu_basico;
+        case CLASSE.mineirador: return SKILL_ID.mine_basico;
+        case CLASSE.menestrel:  return SKILL_ID.mene_basico;
+        case CLASSE.lunatico:   return SKILL_ID.luna_basico;
+        case CLASSE.acolito:    return SKILL_ID.acol_basico;
+    }
+    return SKILL_ID.golpe;
 }
+
+// aliado: nome = nome da classe, visual da facção, skills da classe
+function aliado_de_classe(_classe, _faccao) {
+    var a = new Personagem(nome_da_classe(_classe));
+    visual_aleatorio(a, _classe, _faccao);
+
+    switch (_classe) {
+        case CLASSE.escudeiro:
+            a.stats[STAT.vitalidade] += 2;
+            a.stats[STAT.forca] += 1;
+            break;
+        case CLASSE.mineirador:
+            a.stats[STAT.forca] += 2;
+            a.stats[STAT.tecnica] += 1;
+            break;
+        case CLASSE.menestrel:
+            a.stats[STAT.carisma] += 2;
+            a.stats[STAT.tecnica] += 1;
+            break;
+        case CLASSE.lunatico:
+            a.stats[STAT.imaginacao] += 2;
+            a.stats[STAT.forca] += 1;
+            break;
+        case CLASSE.acolito:
+            a.stats[STAT.tecnica] += 1;
+            a.stats[STAT.sorte] += 1;
+            a.stats[STAT.carisma] += 1;
+            break;
+    }
+
+    // básico da classe (se não desbloqueado, Golpe) + até 2 skills da classe já desbloqueadas
+	var base = classe_skill_base(_classe);
+	a.skills = [skill_nova(skill_desbloqueada(base) ? base : SKILL_ID.golpe)];
+
+	var extras = [];
+	for (var k = 1; k <= 4; k++) {
+	    if (skill_desbloqueada(base + k)) array_push(extras, base + k);
+	}
+		for (var n = 0; n < 2 && array_length(extras) > 0; n++) {
+	    var i = irandom(array_length(extras) - 1);
+	    array_push(a.skills, skill_nova(extras[i]));
+	    array_delete(extras, i, 1);
+	}
+
+    p_curar_total(a);   // sem isso hp = 1 e hp_vis = 1 (veja abaixo)
+    return a;
+
+}
+
 
 // ================= OPÇÕES DE EVENTO =================
 function flavor_padrao(_stat) {
@@ -454,7 +507,121 @@ function criar_deck_jogo() {
     carta_opcoes(c, STAT.carisma, 3, STAT.imaginacao, 3, STAT.vitalidade, 4);
     carta_flavors(c, "Acalmá-la com palavras gentis", "Improvisar uma tala e curativos", "Carregá-la nos ombros até a trilha");
     c.recompensa = RECOMPENSA.aliado;
-    c.aliado_nome = "Mara";
+    c.aliado_classe = CLASSE.menestrel;
+    c.custo_tempo = 4;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    // ---------- ENCONTROS AMIGÁVEIS ----------
+    c = new Card();
+    c.name = "Escudeiro Perdido";
+    c.description = "Um soldado de escudo rachado vaga sozinho e aceita seguir quem o tirar da zona aberta.";
+    c.tipo = CARD_TIPO.amigavel;
+    c.origin = CARD_ORIGIN.faction_3;
+    carta_opcoes(c, STAT.carisma, 3, STAT.vitalidade, 4, STAT.forca, 3);
+    carta_flavors(c, "Oferecer um lugar seguro no grupo", "Dividir a sua água com ele", "Mostrar que você aguenta o tranco");
+    c.recompensa = RECOMPENSA.aliado;
+    c.aliado_classe = CLASSE.escudeiro;
+    c.custo_tempo = 4;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Mineirador Soterrado";
+    c.description = "Um mineirador preso sob entulho pede ajuda. Ele sabe onde ainda há veios intactos.";
+    c.tipo = CARD_TIPO.amigavel;
+    c.origin = CARD_ORIGIN.faction_1;
+    carta_opcoes(c, STAT.forca, 5, STAT.tecnica, 4, STAT.imaginacao, 3);
+    carta_flavors(c, "Levantar o entulho na força", "Escorar a estrutura e puxá-lo", "Inventar uma alavanca com sucata");
+    c.recompensa = RECOMPENSA.aliado;
+    c.aliado_classe = CLASSE.mineirador;
+    c.custo_tempo = 5;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Lunático na Estrada";
+    c.description = "Alguém fala sozinho no meio da trilha. Os olhos dele não piscam, mas ele não parece hostil.";
+    c.tipo = CARD_TIPO.amigavel;
+    c.origin = CARD_ORIGIN.faction_2;
+    carta_opcoes(c, STAT.imaginacao, 4, STAT.carisma, 4, STAT.sorte, 3);
+    carta_flavors(c, "Entrar no jogo de palavras dele", "Convencê-lo com calma", "Arriscar chegar perto");
+    c.recompensa = RECOMPENSA.aliado;
+    c.aliado_classe = CLASSE.lunatico;
+    c.custo_tempo = 4;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Acólito em Jejum";
+    c.description = "Um acólito ajoelhado ao lado de uma fogueira apagada. Ele diz que a luz o abandonou.";
+    c.tipo = CARD_TIPO.amigavel;
+    c.origin = CARD_ORIGIN.faction_2;
+    carta_opcoes(c, STAT.carisma, 4, STAT.tecnica, 3, STAT.sorte, 4);
+    carta_flavors(c, "Dizer o que ele precisa ouvir", "Reacender a fogueira para ele", "Apostar que a luz volta");
+    c.recompensa = RECOMPENSA.aliado;
+    c.aliado_classe = CLASSE.acolito;
+    c.custo_tempo = 4;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    // ---------- EVENTOS DE CENÁRIO ----------
+    c = new Card();
+    c.name = "Ponte Desabada";
+    c.description = "O único caminho seguro sobre a vala foi levado pela última tempestade. Do outro lado há suprimentos largados.";
+    c.sprite_interacao = spr_cenario_base;
+    carta_opcoes(c, STAT.forca, 5, STAT.imaginacao, 4, STAT.tecnica, 4);
+    carta_flavors(c, "Arrastar os destroços e refazer a travessia", "Improvisar um jeito de atravessar", "Calcular onde a estrutura ainda aguenta");
+    c.recompensa_valor = 3;
+    c.custo_tempo = 5;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Horta Abandonada";
+    c.description = "Entre as ruínas, uma horta resistiu ao sol. Com sorte, ainda dá para comer algo.";
+    c.sprite_interacao = spr_cenario_base;
+    carta_opcoes(c, STAT.vitalidade, 4, STAT.tecnica, 3, STAT.sorte, 3);
+    carta_flavors(c, "Cavar até achar raízes saudáveis", "Separar o que não está contaminado", "Provar o que parece comestível");
+    c.recompensa = RECOMPENSA.cura;
+    c.recompensa_valor = 6;
+    c.custo_tempo = 4;
+    c.fail_tempo = 2;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Oficina Saqueada";
+    c.description = "Prateleiras viradas e ferramentas espalhadas. Alguma coisa útil deve ter sobrado.";
+    c.sprite_interacao = spr_cenario_base;
+    carta_opcoes(c, STAT.tecnica, 4, STAT.imaginacao, 4, STAT.forca, 3);
+    carta_flavors(c, "Reaproveitar peças com método", "Montar algo novo com os restos", "Remover o que estiver emperrado");
+    c.recompensa = RECOMPENSA.stat;
+    c.recompensa_stat = STAT.tecnica;
+    c.recompensa_valor = 1;
+    c.custo_tempo = 5;
+    c.fail_tempo = 3;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Abrigo Soterrado";
+    c.description = "A entrada de um antigo abrigo está coberta de pedra. Lá dentro pode haver recursos.";
+    c.sprite_interacao = spr_cenario_base;
+    carta_opcoes(c, STAT.forca, 6, STAT.vitalidade, 5, STAT.tecnica, 4);
+    carta_flavors(c, "Quebrar a pedra na marra", "Cavar sem parar até abrir passagem", "Procurar o ponto fraco da entrada");
+    c.recompensa_valor = 5;
+    c.custo_tempo = 6;
+    c.fail_tempo = 4;
+    array_push(deck, c);
+
+    c = new Card();
+    c.name = "Altar de Sucata";
+    c.description = "Alguém montou um altar com peças de máquina. As oferendas ainda estão ali.";
+    c.sprite_interacao = spr_cenario_base;
+    carta_opcoes(c, STAT.sorte, 4, STAT.carisma, 3, STAT.imaginacao, 3);
+    carta_flavors(c, "Pegar uma oferenda e torcer", "Fazer uma prece convincente", "Criar um ritual de improviso");
+    c.recompensa = RECOMPENSA.stat;
+    c.recompensa_stat = STAT.sorte;
+    c.recompensa_valor = 1;
     c.custo_tempo = 4;
     c.fail_tempo = 3;
     array_push(deck, c);
@@ -468,13 +635,13 @@ function criar_deck_jogo() {
 function criar_upgrades() {
     var lista = [
         // --- TEMPO / SOBREVIVÊNCIA (coluna 0) ---
-        new Upgrade("Reservas de Água I", "+6 tempo inicial", 3, UPG_EFEITO.tempo, 0, 6, -1, 0, 0),                    // 0
-        new Upgrade("Reservas de Água II", "+6 tempo inicial", 5, UPG_EFEITO.tempo, 0, 6, 0, 0, 1),                    // 1
+        new Upgrade("Reservas de Água I", "+100 tempo inicial", 3, UPG_EFEITO.tempo, 0, 100, -1, 0, 0),                    // 0
+        new Upgrade("Reservas de Água II", "+200 tempo inicial", 5, UPG_EFEITO.tempo, 0, 200, 0, 0, 1),                    // 1
         new Upgrade("Kit de Acampamento", "Restaura todo o relógio 1x na run", 8, UPG_EFEITO.acampamento, 0, 1, 1, 0, 2), // 2
 
         // --- PLANEJAMENTO E EFICIÊNCIA (colunas 1 e 2) ---
-        new Upgrade("Planos Estratégicos I", "Eventos -1 min", 4, UPG_EFEITO.custo_evento, 0, 1, -1, 1, 0),            // 3
-        new Upgrade("Planos Estratégicos II", "Eventos mais -1 min", 6, UPG_EFEITO.custo_evento, 0, 1, 3, 1, 1),       // 4
+        new Upgrade("Planos Estratégicos I", "Eventos custam -2 min", 4, UPG_EFEITO.custo_evento, 0, 2, -1, 1, 0),            // 3
+        new Upgrade("Planos Estratégicos II", "Eventos custam -2 min", 6, UPG_EFEITO.custo_evento, 0, 2, 3, 1, 1),       // 4
         new Upgrade("Atalho", "Contornar -1 min", 3, UPG_EFEITO.contornar, 0, 1, 3, 2, 1),                             // 5
         new Upgrade("Rota Segura", "Retorno -2 min", 4, UPG_EFEITO.retorno, 0, 2, 4, 1, 2),                            // 6
 
@@ -574,8 +741,16 @@ function acao_iniciar_run(_fac) {
     ja_acampou_run = false;
     var aliados_iniciais = 0;
 
+    // player: corpo fixo da facção + primeira cabeça da cor dela
+    var o = origem_da_faccao(_fac);
+    var cls_player = [CLASSE.escudeiro, CLASSE.acolito, CLASSE.menestrel];   // mesma ordem do lib_player
     player = new Personagem("Sobrevivente F" + string(_fac + 1));
-    visual_fixo(player, CLASSE.sobrevivente, origem_da_faccao(_fac), lib_player[_fac], noone);
+    visual_fixo(player, cls_player[_fac], o, lib_player[_fac], lib_cabecas[o][0]);
+
+	// player usa sprite completo, sem cabeça separada
+	player.spr_body = spr_player;
+	player.spr_head = noone;
+	player.spr_overworld = spr_player;
     player.skills = [skill_nova(SKILL_ID.golpe), skill_nova(SKILL_ID.tiro)];
     aliados = [];
 
@@ -596,11 +771,9 @@ function acao_iniciar_run(_fac) {
         }
     }
 	hab_aplicar_equipadas(player, _fac);
-    // Adiciona aliados iniciais comprados na árvore de upgrades
+    // Adiciona aliados iniciais comprados na árvore de upgrades (classe sorteada)
     for (var k = 0; k < min(aliados_iniciais, 2); k++) {
-        var novo_aliado = aliado_novo("Aliado " + string(k + 1), origem_da_faccao(_fac));
-        aliado_sortear_skills(novo_aliado, 2);
-        array_push(aliados, novo_aliado);
+        array_push(aliados, aliado_de_classe(irandom(CLASSE.count - 1), origem_da_faccao(_fac)));
     }
 
     run_missao = missao_sel;
@@ -611,7 +784,7 @@ function acao_iniciar_run(_fac) {
     if (run_missao != undefined) {
         var m = missoes[run_missao.d][run_missao.i];
         if (m.tipo == MISSAO_TIPO.escolta) {
-            escoltado = aliado_novo(m.npc_nome, origem_da_faccao(run_missao.d));
+            escoltado = aliado_de_classe(irandom(CLASSE.count - 1), origem_da_faccao(run_missao.d));
             array_push(aliados, escoltado);
             cutscene_tocar(CUT.tut_escolta);
         } else if (m.tipo == MISSAO_TIPO.entrega) {
@@ -725,7 +898,7 @@ function acao_mostrar_card(_c) {
         montar_inimigos(_c);
         figura_evento = inimigos[0];
     } else if (_c.tipo == CARD_TIPO.amigavel) {
-        figura_evento = aliado_novo(_c.aliado_nome, _c.origin);
+        figura_evento = aliado_de_classe(_c.aliado_classe, _c.origin);
     } else if (_c.sprite_interacao == noone) {
         figura_evento = figurante_novo(_c.origin);
     }
@@ -749,9 +922,8 @@ function acao_mostrar_card(_c) {
             break;
     }
 
-    if (_c.tipo == CARD_TIPO.hostil) {
-        cutscene_tocar(CUT.tut_combate);
-    } else if (_c.tipo == CARD_TIPO.evento || _c.tipo == CARD_TIPO.amigavel) {
+    // o tutorial de combate agora toca em step_card, quando o combate já começou
+    if (_c.tipo == CARD_TIPO.evento || _c.tipo == CARD_TIPO.amigavel) {
         cutscene_tocar(CUT.tut_evento);
         if (_c.recompensa == RECOMPENSA.relacao) cutscene_tocar(CUT.tut_diplomacia);
     }
@@ -806,13 +978,15 @@ function acao_aplicar_recompensa(_c) {
             if (_c.recompensa_stat == STAT.vitalidade) player.hp += _c.recompensa_valor * 3;
             return "+" + string(_c.recompensa_valor) + " " + stat_nomes[_c.recompensa_stat] + " até o fim da expedição.";
         case RECOMPENSA.aliado:
-            if (array_length(aliados) < MAX_GRUPO - 1) {
-                novo = (_c.tipo == CARD_TIPO.amigavel) ? figura_evento : aliado_novo(_c.aliado_nome, _c.origin);
-                array_push(aliados, novo);
-                return _c.aliado_nome + " se juntou ao seu grupo!";
-            }
-            recurso += 3;
-            return "Seu grupo já está cheio, então ela deixa 3 recursos de suprimento.";
+		    if (array_length(aliados) < MAX_GRUPO - 1) {
+		        // usa o personagem mostrado no card; se ele não existir mais, cria um novo da classe
+		        if (_c.tipo == CARD_TIPO.amigavel && is_struct(figura_evento)) novo = figura_evento;
+		        else novo = aliado_de_classe(_c.aliado_classe, _c.origin);
+		        array_push(aliados, novo);
+		        return nome_da_classe(_c.aliado_classe) + " se juntou ao seu grupo!";
+		    }
+		    recurso += 3;
+		    return "Seu grupo já está cheio, então ela deixa 3 recursos de suprimento.";
         case RECOMPENSA.relacao:
             relacao_mudar(_c.origin, 1);
             return "Acordo firmado! Relação com a Facção " + string(_c.origin) + ": " + string(relacao[faccao_atual][_c.origin]) + " / " + string(RELACAO_MAX) + ".";
@@ -951,6 +1125,7 @@ function step_card() {
     } else {
         if (carta_atual.tipo == CARD_TIPO.hostil) {
             acao_iniciar_combate(carta_atual);
+            cutscene_tocar(CUT.tut_combate);
         } else if (tempo <= 0) {
             acao_finalizar_run(FIM_RUN.tempo);
         } else {
@@ -1152,4 +1327,13 @@ function calcular_hover() {
             if (util_in(box_skill(k))) hover = HV.skill + k;
         }
     }
+}
+
+// true se o jogador já desbloqueou essa habilidade
+function skill_desbloqueada(_id) {
+    var pool = skills_desbloqueadas();
+    for (var i = 0; i < array_length(pool); i++) {
+        if (pool[i] == _id) return true;
+    }
+    return false;
 }

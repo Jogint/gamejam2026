@@ -155,6 +155,7 @@ function draw_personagem(_p, _x, _y, _esc, _overworld, _flip) {
 
         draw_sprite_ext(_p.spr_head, sub_h, _x, head_y, xs_cabeca, esc_cabeca, 0, cor, alfa_atual);
     }
+	
 }
 
 function draw_hp_barra(_x1, _y1, _x2, _y2, _p) {
@@ -182,13 +183,7 @@ function draw_slot_personagem(_b, _p, _hv_id, _valido, _flip) {
     var vivo = (_p.hp > 0);
     var h = (_hv_id >= 0) ? hover_anim[_hv_id] : 0;
 
-    draw_set_color(vivo ? c_dkgray : c_black);
-    draw_rectangle(x1, y1, x2, y2, false);
-
-    if (h > 0.01 && _valido) {
-        draw_set_color(merge_color(c_dkgray, c_white, 0.3));
-        draw_rectangle(x1, y1, x1 + (x2 - x1) * h, y2, false);
-    }
+    // (fundo cinza/preto e preenchimento de hover removidos)
 
     if (_p.flash > 0) {
         draw_set_alpha((_p.flash / 12) * 0.6);
@@ -197,9 +192,17 @@ function draw_slot_personagem(_b, _p, _hv_id, _valido, _flip) {
         draw_set_alpha(1);
     }
 
-    draw_set_color(_valido ? c_yellow : (vivo ? c_white : c_gray));
-    draw_rectangle(x1, y1, x2, y2, true);
-    if (_valido) draw_rectangle(x1 + 1, y1 + 1, x2 - 1, y2 - 1, true);
+    // Borda só aparece quando o slot é um alvo válido
+    if (_valido) {
+        draw_set_color(c_yellow);
+        draw_rectangle(x1, y1, x2, y2, true);
+        draw_rectangle(x1 + 1, y1 + 1, x2 - 1, y2 - 1, true);
+
+        if (h > 0.01) {
+            draw_set_color(c_white);
+            draw_rectangle(x1 + 2, y1 + 2, x2 - 2, y2 - 2, true);
+        }
+    }
 
     draw_set_halign(fa_center);
     draw_set_color(vivo ? c_white : c_gray);
@@ -225,15 +228,10 @@ function draw_slot_personagem(_b, _p, _hv_id, _valido, _flip) {
 }
 
 function draw_paineis() {
-    draw_set_color(c_dkgray);
-    draw_rectangle(30, 20, 330, 520, false);
-    draw_rectangle(950, 20, 1250, 520, false);
-    draw_set_color(c_white);
-    draw_rectangle(30, 20, 330, 520, true);
-    draw_rectangle(950, 20, 1250, 520, true);
-
+    // (retângulos cinzas dos painéis laterais removidos)
     if (estado == GAME_STATE.combat) return;
 
+    draw_set_color(c_white);
     draw_set_halign(fa_center);
     draw_text(180, 40, player.nome);
     var g = get_grupo();
@@ -617,12 +615,9 @@ function draw_fim_run() {
 }
 
 function draw_painel_lider() {
-    draw_set_color(c_dkgray);
-    draw_rectangle(950, 20, 1250, 520, false);
-    draw_set_color(c_white);
-    draw_rectangle(950, 20, 1250, 520, true);
-
+    // (retângulo cinza do painel removido)
     var l = lideres[faccao_atual];
+    draw_set_color(c_white);
     draw_set_halign(fa_center);
     draw_text(1100, 40, l.nome);
     draw_personagem(l, 1100, 440, 2, true, true);

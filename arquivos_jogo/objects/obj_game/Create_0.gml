@@ -102,6 +102,7 @@ acao_iniciar_run(FACTION.faction_1);
 estado = GAME_STATE.preparacao;   // começa no hub
 
 
-// NOVO: abertura
-cutscene_tocar(CUT.intro);
-cutscene_tocar(CUT.tut_preparacao);
+// menu inicial
+menu_ativo = true;
+menu_tela = 0;   // 0 = principal, 1 = créditos
+menu_anim = array_create(MENU_BTNS + 1, 0);

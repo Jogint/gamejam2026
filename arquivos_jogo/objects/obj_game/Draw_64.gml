@@ -8,8 +8,17 @@ if (fim_jogo) {
     exit;
 }
 
-// NOVO: com cutscene ativa, a cena desliza para baixo
-if (cs_ativa) matrix_set(matrix_world, matrix_build(0, cs_anim * 720, 0, 0, 0, 0, 1, 1, 1));
+if (menu_ativo) {
+    draw_menu();
+    draw_set_color(c_white);
+    exit;
+}
+
+// cutscene de história: a cena desliza para baixo.
+// tutorial: a cena fica parada, para o destaque aparecer em cima da HUD.
+if (cs_ativa && !cutscene_eh_tutorial(cs_id)) {
+    matrix_set(matrix_world, matrix_build(0, cs_anim * 720, 0, 0, 0, 0, 1, 1, 1));
+}
 
 if (estado == GAME_STATE.preparacao) {
     draw_preparacao();

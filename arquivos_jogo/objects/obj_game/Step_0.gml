@@ -11,6 +11,12 @@ if (fim_jogo) {
     exit;
 }
 
+// menu inicial
+if (menu_ativo) {
+    step_menu(clicou);
+    exit;
+}
+
 // NOVO: cutscene/tutorial ativo trava o resto do jogo
 if (cs_ativa) {
     hover = -1;

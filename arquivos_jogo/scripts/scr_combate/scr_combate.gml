@@ -65,10 +65,11 @@ function combate_log(_txt) {
 }
 
 // Soma todo o tempo acumulado pelas ações na rodada
+// Pega o tempo da ação mais demorada da rodada
 function calcular_tempo_rodada() {
     var t = 0;
     for (var i = 0; i < array_length(c_tempos); i++) {
-        t += c_tempos[i];
+        t = max(t, c_tempos[i]);
     }
     return t;
 }

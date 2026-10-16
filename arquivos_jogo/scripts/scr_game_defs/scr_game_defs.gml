@@ -37,7 +37,14 @@ enum SKILL_ID { golpe, pancada, mordida, disparo, tiro, improviso, remendo, inve
                 // lunatico
                 luna_basico, luna_palacio, luna_empalar, luna_arroto, luna_respiracao }
 enum ENEMY_ID { besta, saqueador, sentinela, rato, guarda, colosso }
-enum CLASSE { sobrevivente, soldado, mutante, maquina, civil, count }
+enum CLASSE {
+    escudeiro,   // shielder
+    mineirador,  // miner
+    menestrel,   // ministrel
+    lunatico,    // lunatic
+    acolito,     // acolyte
+    count
+}
 enum COMBAT_FASE { skill, alvo, resolver, fim }
 enum COMBAT_RES { nenhum, vitoria, derrota, tempo }
 enum FIM_RUN { retorno, trilha, tempo, derrota }
@@ -109,7 +116,7 @@ function Personagem(_nome) constructor {
     pula = false;
     defendendo = false;
 
-    classe = CLASSE.civil;
+    classe = CLASSE.menestrel;
     faccao = CARD_ORIGIN.neutral;
     importante = false;
     spr_head = noone;
@@ -135,6 +142,7 @@ function Card() constructor {
     fail_tempo = 3;             // Tempo extra consumido em caso de falha
     inimigos = [];
     aliado_nome = "Aliado";
+    aliado_classe = CLASSE.escudeiro;   // classe do aliado recrutável
 
     missao_f = -1;
     missao_i = -1;
